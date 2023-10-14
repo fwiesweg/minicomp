@@ -1,0 +1,90 @@
+<table mat-table [dataSource]="participantsService.participants">
+
+  <ng-container matColumnDef="firstName">
+    <th mat-header-cell *matHeaderCellDef>First name</th>
+    <td mat-cell *matCellDef="let element">{{element.firstName}}</td>
+  </ng-container>
+
+  <!-- Weight Column -->
+  <ng-container matColumnDef="lastName">
+    <th mat-header-cell *matHeaderCellDef>Last name</th>
+    <td mat-cell *matCellDef="let element">{{element.lastName}}</td>
+  </ng-container>
+
+  <!-- Symbol Column -->
+  <ng-container matColumnDef="role">
+    <th mat-header-cell *matHeaderCellDef>Role</th>
+    <td mat-cell *matCellDef="let element">{{element.role}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef></th>
+    <td mat-cell *matCellDef="let element">
+      <button type="button" mat-icon-button (click)="participantsService.removeParticipant(element)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns | async"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns | async;"></tr>
+</table>
+
+<mat-card style="width: 100%; margin-top: 50px" *ngIf="!(participantsService.locked | async)">
+  <mat-card-header>
+    <mat-card-title>Add a participant</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="participantFormGroup" style="padding: 10px">
+      <div class="flex-row">
+        <mat-form-field appearance="fill" class="flex-fill">
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" name="firstName">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="flex-fill">
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" name="lastName">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role" name="role">
+            <mat-option value="LEAD">Lead</mat-option>
+            <mat-option value="FOLLOW">Follow</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="flex-row">
+        <div class="flex-fill"></div>
+        <button mat-raised-button color="primary" class="flex-auto" type="button" (click)="addParticipant()"
+                [disabled]="participantFormGroup.invalid">
+          Add
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card style="width: 100%; margin-top: 50px">
+  <mat-card-header>
+    <mat-card-title>Start competition</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="flex-row" *ngIf="!(participantsService.locked | async)">
+      <p class="flex-fill">In order to start the first round, you have to lock the participants. Once started, the participants can only be edited by resetting the competion.</p>
+      <div class="flex-fill"></div>
+      <button mat-raised-button color="primary" class="flex-auto" type="button" (click)="lock()">
+        Lock participants
+      </button>
+    </div>
+
+    <div class="flex-row" *ngIf="participantsService.locked | async">
+      <p class="flex-fill">The competition has been started. You cannot edit participants without resetting the competition.</p>
+      <div class="flex-fill"></div>
+      <a class="flex-auto" mat-raised-button color="primary" routerLink="../rounds">Show rounds</a>
+      </div>
+  </mat-card-content>
+</mat-card>

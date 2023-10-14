@@ -2,3 +2,31 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-item {
+  :first-child {
+    margin-left: 0;
+  }
+
+  :last-child {
+    margin-right: 0;
+  }
+
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.flex-fill {
+  @extend .flex-item;
+  flex: 1 1 100%;
+}
+
+.flex-auto {
+  @extend .flex-item;
+  flex: 0 0 auto;
+}
