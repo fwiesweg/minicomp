@@ -15,6 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { BehaviorSubjectStorageService, StorageService } from 'src/app/data/storage.service';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,10 @@ import { MatSelectModule } from '@angular/material/select';
     MatInputModule,
     MatSelectModule
   ],
-  providers: [],
+  providers: [ {
+    provide: StorageService,
+    useClass: BehaviorSubjectStorageService,
+  }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

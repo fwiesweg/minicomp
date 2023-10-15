@@ -1,14 +1,28 @@
-export type Id = string;
+//
+// Management
+//
 
-export class BaseHelpers {
-
-  public static generateId(): Id {
-    return crypto.randomUUID();
-  }
-
+export interface BaseTypeMap {
+  Participant: Participant
+  Round: Round,
 }
 
-export type BaseType = ParticipantType | RoundType;
+export type BaseType = keyof BaseTypeMap
+
+
+const BASE_NAME_MAP = {
+  Participant: 'Participant',
+  Round: 'Round',
+} as const;
+export const BASE_TYPES: ReadonlyArray<BaseType> = Object.values(BASE_NAME_MAP);
+
+//
+// Actual models
+//
+
+export type Id = string;
+export const generateId = () => crypto.randomUUID();
+
 
 export interface Base {
   id: Id;
@@ -27,6 +41,7 @@ export type BaseInput<T extends Base> = {
 export type ParticipantType = 'Participant';
 export type Role = 'LEAD' | 'FOLLOW';
 
+
 export interface Participant extends Base {
   type: ParticipantType;
 
@@ -42,5 +57,4 @@ export interface Round extends Base {
   type: RoundType;
 
   name: string;
-
 }

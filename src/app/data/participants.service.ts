@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { BaseHelpers, BaseInput, Participant } from './model';
-import { BehaviorSubject, first, map, Observable, Subject } from 'rxjs';
+import { BaseInput, generateId, Participant } from 'src/app/data/model.base';
+import { combineLatest, first, map, Observable, switchMap, throwError } from 'rxjs';
+import { StorageService } from 'src/app/data/storage.service';
+import { State } from 'src/app/data/model.singleton';
 
 @Injectable({
   providedIn: 'root'
@@ -20,71 +22,62 @@ export class ParticipantsService {
     return p1.id.localeCompare(p2.id);
   }
 
-  private _locked = new BehaviorSubject<boolean>(false);
-  private _participants = new BehaviorSubject<ReadonlyArray<Participant>>([ {
-    id: BaseHelpers.generateId(),
-    type: 'Participant',
-    firstName: 'Florian',
-    lastName: 'Wiesweg',
-    role: 'LEAD',
-  }, {
-    id: BaseHelpers.generateId(),
-    type: 'Participant',
-    firstName: 'Michèle-Rose',
-    lastName: 'Gorovoy',
-    role: 'FOLLOW',
-  } ]);
+  constructor(private storageService: StorageService) {
+  }
 
   public get locked() {
-    return this._locked.asObservable();
+    return this.storageService.readSingleton('State').pipe(
+      map(state => state.locked));
   }
 
   public get participants() {
-    return this._participants.asObservable();
+    return this.storageService.read('Participant');
   }
 
-  public addParticipant(p: BaseInput<Participant> | null | undefined) {
-    if(this._locked.value) {
-      throw new Error();
-    }
+  private edit<T>(editFunction: ((state: State, participants: Participant[]) => Observable<T>)): Observable<T> {
+    return combineLatest([
+      this.storageService.readSingleton('State'),
+      this.participants
+    ]).pipe(first(), switchMap(([ state, participants ]) => {
+      if(state.locked) throw new Error();
 
-    if(p == null || p.firstName == null || p.lastName == null || p.role == null) {
-      throw new Error()
-    }
-
-    const participants = [ ...this._participants.value, {
-      ...p,
-      id: BaseHelpers.generateId(),
-      type: 'Participant',
-    } as Required<Participant> ]
-    participants.sort(ParticipantsService.sort)
-    this._participants.next(participants);
+      return editFunction(state, participants);
+    }));
   }
 
-  public removeParticipant(p: Participant) {
-    if(this._locked.value) {
-      throw new Error();
-    }
-
-    this._participants.next(this._participants.value
-      .filter(x => x.id != p.id));
+  public addParticipant(input: BaseInput<Participant> | null | undefined): Observable<null> {
+    return this.edit((state, participants) => {
+      participants = [ ...participants, {
+        ...input,
+        id: generateId(),
+        type: 'Participant',
+      } as Required<Participant> ]
+      participants.sort(ParticipantsService.sort)
+      return this.storageService.store('Participant', participants)
+    });
   }
 
-  public lock(): Observable<null | string> {
-    return this._participants.pipe(
-      first(),
-      map(value => {
-        const numLead = value.filter(p => p.role == 'LEAD').length;
-        const numFollow = value.filter(p => p.role == 'FOLLOW').length;
+  public removeParticipant(input: Participant): Observable<null> {
+    return this.edit((state, participants) => {
+      participants = participants.filter(x => x.id != input.id);
+      participants.sort(ParticipantsService.sort)
+      return this.storageService.store('Participant', participants);
+    });
+  }
 
-        const error = numLead == numFollow ? null : 'Could not lock competition: unequal distribution of roles.';
+  public lock(): Observable<null> {
+    return this.edit((state, participants) => {
+      const numLead = participants.filter(p => p.role == 'LEAD').length;
+      const numFollow = participants.filter(p => p.role == 'FOLLOW').length;
 
-        if(error == null) {
-          this._locked.next(true);
-        }
+      if(numLead != numFollow) {
+        return throwError(() => 'Could not lock competition: unequal distribution of roles.');
+      }
 
-        return error;
-      })
-    )
+      return this.storageService.storeSingleton('State', {
+        ...state,
+        locked: true
+      });
+    });
   }
 }

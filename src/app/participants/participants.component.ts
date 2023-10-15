@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ParticipantsService } from 'src/app/data/participants.service';
 import { MatTable } from '@angular/material/table';
-import { Id, Participant, ParticipantType, Role } from 'src/app/data/model';
-import { filter, map, Subscription, tap } from 'rxjs';
+import { Id, Participant, ParticipantType, Role } from 'src/app/data/model.base';
+import { catchError, filter, map, of, Subscription, tap } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -46,7 +46,7 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
   }
 
   addParticipant() {
-    this.participantsService.addParticipant(this.participantFormGroup.value);
+    this.participantsService.addParticipant(this.participantFormGroup.value).subscribe();
 
     this.participantFormGroup.reset();
     this.participantFormGroup.markAsUntouched();
@@ -55,12 +55,11 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
   }
 
   lock() {
-    this.participantsService.lock()
-      .pipe(tap(error => {
-        if(error == null) return;
-
+    this.participantsService.lock().pipe(
+      catchError((error) => {
         alert(error);
-      }))
-      .subscribe()
+        return of(null);
+      })
+    ).subscribe()
   }
 }
