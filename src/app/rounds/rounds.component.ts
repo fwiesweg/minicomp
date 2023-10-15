@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RoundsService } from 'src/app/data/rounds.service';
 
 @Component({
   selector: 'app-rounds',
@@ -6,5 +7,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./rounds.component.scss']
 })
 export class RoundsComponent {
-
+  constructor(public roundsService: RoundsService) {
+  }
 }

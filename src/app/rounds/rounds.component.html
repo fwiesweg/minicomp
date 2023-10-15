@@ -1,1 +1,11 @@
-<p>rounds works!</p>
+<mat-card *ngIf="!(roundsService.active | async)">
+  <mat-card-header>
+    <mat-card-title>Participants not locked</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>In order to start the first round, you have to lock the participants. Once started, the participants can only be edited by resetting the competion.</p>
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <a mat-raised-button color="primary" class="flex-auto" type="button" routerLink="../participants">Show participants</a>
+  </mat-card-actions>
+</mat-card>
