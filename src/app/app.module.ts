@@ -15,7 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { BehaviorSubjectStorageService, StorageService } from 'src/app/data/storage.service';
+import { LocalStorageService, StorageService } from 'src/app/data/storage.service';
 
 @NgModule({
   declarations: [
@@ -39,7 +39,7 @@ import { BehaviorSubjectStorageService, StorageService } from 'src/app/data/stor
   ],
   providers: [ {
     provide: StorageService,
-    useClass: BehaviorSubjectStorageService,
+    useClass: LocalStorageService,
   }],
   bootstrap: [AppComponent]
 })

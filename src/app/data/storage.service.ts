@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Base, BASE_TYPES, BaseType, BaseTypeMap, generateId, Participant, Round } from 'src/app/data/model.base';
-import { BehaviorSubject, Observable, of, tap } from 'rxjs';
-import { SingletonType, SingletonTypeMap, State } from 'src/app/data/model.singleton';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BASE_TYPES, BaseType, BaseTypeMap, generateId, Participant, Round } from 'src/app/data/model.base';
+import { BehaviorSubject, EMPTY, fromEvent, Observable, of, Subscription, switchMap, tap } from 'rxjs';
+import { SINGLETON_TYPES, SingletonType, SingletonTypeMap, State } from 'src/app/data/model.singleton';
 
 
 export abstract class StorageService {
@@ -25,7 +25,7 @@ type SingletonSubjects = { [key in SingletonType]: BehaviorSubject<SingletonType
 export class BehaviorSubjectStorageService extends StorageService {
 
   private baseSubjects: BaseSubjects = {
-    Participant: new BehaviorSubject<Participant[]>([ {
+    Participant: new BehaviorSubject<Participant[]>(/*[ {
       id: generateId(),
       type: 'Participant',
       firstName: 'Florian',
@@ -37,7 +37,7 @@ export class BehaviorSubjectStorageService extends StorageService {
       firstName: 'Michèle-Rose',
       lastName: 'Gorovoy',
       role: 'FOLLOW',
-    } ]),
+    } ]*/[]),
     Round: new BehaviorSubject<Round[]>([] as Round[]),
   }
 
@@ -82,3 +82,84 @@ export class BehaviorSubjectStorageService extends StorageService {
     )
   }
 }
+
+const BASE_PREFIX = 'BASE_';
+const SINGLETON_PREFIX = 'SINGLETON_';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LocalStorageService extends BehaviorSubjectStorageService implements OnDestroy {
+
+
+  constructor() {
+    super();
+
+    // this is racy, but I'm too lazy to implement it properly
+
+    this.subscription.add(fromEvent(window, 'storage').pipe(
+      switchMap(e => {
+        const event = e as StorageEvent;
+        return this.loadData(event.key, event.newValue);
+      })
+    ).subscribe());
+
+    for(let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if(key == null) {
+        continue;
+      }
+
+      this.loadData(key, localStorage.getItem(key)).subscribe();
+    }
+  }
+
+  private subscription = new Subscription();
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  private loadData(key: string | null, value: string | null) {
+    if(key == null || value == null) {
+      return EMPTY;
+    }
+
+    if(key.startsWith(BASE_PREFIX)) {
+      const model = key.substring(BASE_PREFIX.length) as BaseType;
+      if(!BASE_TYPES.includes(model)) {
+        return EMPTY;
+      }
+
+      return this.store(model, JSON.parse(value));
+    } else if(key.startsWith(SINGLETON_PREFIX)) {
+      const model = key.substring(SINGLETON_PREFIX.length) as SingletonType;
+      if(!SINGLETON_TYPES.includes(model)) {
+        return EMPTY;
+      }
+
+      return this.storeSingleton(model, JSON.parse(value));
+    } else {
+      return EMPTY;
+    }
+  }
+
+  public override store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null> {
+    return super.store(model, data).pipe(
+      tap(() => {
+        localStorage.setItem(BASE_PREFIX + model, JSON.stringify(data));
+      })
+    );
+  }
+
+  public override storeSingleton<T extends SingletonType>(model: T, data: SingletonTypeMap[T]): Observable<null> {
+    return super.storeSingleton(model, data).pipe(
+      tap(() => {
+        localStorage.setItem(SINGLETON_PREFIX + model, JSON.stringify(data));
+      })
+    );
+  }
+}
+
+
