@@ -51,10 +51,26 @@ export interface Participant extends Base {
   role: Role
 }
 
+export interface ParticipantLead extends Participant {
+  role: 'LEAD';
+}
+
+export interface ParticipantFollow extends Participant {
+  role: 'FOLLOW';
+}
+
 export type RoundType = 'Round';
 
 export interface Round extends Base {
   type: RoundType;
 
   name: string;
+  heats: Couple[][]
+}
+
+export interface Couple {
+  lead: ParticipantLead
+  follow: ParticipantFollow
+
+  points: number | null;
 }

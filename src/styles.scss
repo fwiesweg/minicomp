@@ -8,6 +8,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   flex-direction: row;
 }
 
+.flex-row-wrap {
+  @extend .flex-row;
+  flex-wrap: wrap;
+}
+
 .flex-item {
   :first-child {
     margin-left: 0;
