@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BASE_TYPES, BaseType, BaseTypeMap, generateId, Participant, Round } from 'src/app/data/model.base';
-import { BehaviorSubject, EMPTY, fromEvent, Observable, of, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, first, fromEvent, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { SINGLETON_TYPES, SingletonType, SingletonTypeMap, State } from 'src/app/data/model.singleton';
 
 
@@ -9,6 +9,16 @@ export abstract class StorageService {
   public abstract read<T extends BaseType>(model: T): Observable<BaseTypeMap[T][]>;
 
   public abstract store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null>;
+
+  public edit<T extends BaseType>(model: T,
+      filter: (data: BaseTypeMap[T]) => boolean,
+      edit: (data: BaseTypeMap[T]) => BaseTypeMap[T]) {
+    return this.read(model).pipe(
+      first(),
+      map(x => x.filter(filter).map(edit)),
+      switchMap(x => this.store(model, x))
+    );
+  }
 
   public abstract readSingleton<T extends SingletonType>(model: T): Observable<SingletonTypeMap[T]>;
 

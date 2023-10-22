@@ -5,13 +5,11 @@
     <td mat-cell *matCellDef="let element">{{element.firstName}}</td>
   </ng-container>
 
-  <!-- Weight Column -->
   <ng-container matColumnDef="lastName">
     <th mat-header-cell *matHeaderCellDef>Last name</th>
     <td mat-cell *matCellDef="let element">{{element.lastName}}</td>
   </ng-container>
 
-  <!-- Symbol Column -->
   <ng-container matColumnDef="role">
     <th mat-header-cell *matHeaderCellDef>Role</th>
     <td mat-cell *matCellDef="let element">{{element.role}}</td>
@@ -30,7 +28,7 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns | async;"></tr>
 </table>
 
-<mat-card style="width: 100%; margin-top: 50px" *ngIf="!(participantsService.locked | async)">
+<mat-card class="main-card" *ngIf="!(participantsService.locked | async)">
   <mat-card-header>
     <mat-card-title>Add a participant</mat-card-title>
   </mat-card-header>
@@ -68,7 +66,7 @@
   </mat-card-content>
 </mat-card>
 
-<mat-card style="width: 100%; margin-top: 50px" *ngIf="!(participantsService.locked | async)">
+<mat-card class="main-card" *ngIf="!(participantsService.locked | async)">
   <mat-card-header>
     <mat-card-title>Start competition</mat-card-title>
   </mat-card-header>
@@ -82,7 +80,7 @@
   </mat-card-actions>
 </mat-card>
 
-<mat-card style="width: 100%; margin-top: 50px" *ngIf="(participantsService.locked | async)">
+<mat-card class="main-card" *ngIf="(participantsService.locked | async)">
   <mat-card-header>
     <mat-card-title>Participants locked</mat-card-title>
   </mat-card-header>

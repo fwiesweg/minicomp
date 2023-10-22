@@ -23,22 +23,24 @@ export class ParticipantsService {
 
   public readonly locked: Observable<boolean>;
   public readonly participants: Observable<Participant[]>;
+  public readonly unlocked: Observable<boolean>;
 
   constructor(private storageService: StorageService) {
     this.locked = this.storageService.readSingleton('State').pipe(
       map(state => state.locked));
+    this.unlocked = this.locked.pipe(map(x => !x));
     this.participants = this.storageService.read('Participant').pipe(
       map(x => x.sort(ParticipantsService.sort)),
       shareReplay(1)
     );
   }
 
-  private edit<T>(editFunction: ((state: State, participants: Participant[]) => Observable<T>)): Observable<T> {
+  private edit<T>(editFunction: ((state: State, participants: Participant[]) => Observable<T>), allowLocked: boolean = false): Observable<T> {
     return combineLatest([
       this.storageService.readSingleton('State'),
       this.participants
     ]).pipe(first(), switchMap(([ state, participants ]) => {
-      if(state.locked) throw new Error();
+      if(!allowLocked && state.locked) throw new Error();
 
       return editFunction(state, participants);
     }));
@@ -77,5 +79,12 @@ export class ParticipantsService {
         locked: true
       });
     });
+  }
+
+  public unlock(): Observable<null> {
+    return this.edit((state, participants) => this.storageService.storeSingleton('State', {
+      ...state,
+      locked: false
+    }), true);
   }
 }
