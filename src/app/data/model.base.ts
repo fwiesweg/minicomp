@@ -3,11 +3,12 @@
 //
 
 export interface BaseTypeMap {
+  '': never,
   Participant: Participant
   Round: Round,
 }
 
-export type BaseType = keyof BaseTypeMap
+export type BaseType = Exclude<keyof BaseTypeMap, ''>;
 
 
 const BASE_NAME_MAP = {
@@ -22,11 +23,13 @@ export const BASE_TYPES: ReadonlyArray<BaseType> = Object.values(BASE_NAME_MAP);
 
 export type Id = string;
 export const generateId = () => crypto.randomUUID();
+export const trackById = (idx: number, b: Base) => b.id;
+export const trackByIdx = (idx: number, b: unknown) => idx;
 
 
 export interface Base {
   id: Id;
-  type: BaseType;
+  type: BaseType | '';
 }
 
 
@@ -70,9 +73,9 @@ export interface Round extends Base {
   heats: readonly Couple[][]
 }
 
-export interface Couple {
+export interface Couple extends Base {
+  type: '';
+
   lead: Id
   follow: Id
-
-  points: number | null;
 }

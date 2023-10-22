@@ -10,7 +10,7 @@
   </mat-card-actions>
 </mat-card>
 
-<ng-container *ngFor="let round of (roundsService.rounds | async)">
+<ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id">
   <mat-card class="main-card" *ngIf="round.state === 'EVALUATED'">
     <mat-card-header>
       <mat-card-title>Previous round: #{{round.number + 1}}</mat-card-title>
@@ -31,52 +31,16 @@
       <mat-card-title>Next round: #{{round.number + 1}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="nextRoundFormGroup">
-        <div class="flex-row-wrap">
-          <mat-form-field appearance="fill" class="flex-auto">
-            <mat-label>Number of heats</mat-label>
-            <input matInput type="number" min="1" formControlName="heats">
-          </mat-form-field>
-
-          <mat-form-field appearance="fill" class="flex-auto" *ngFor="let formControl of nextRoundFormGroup.controls.heatSizes.controls; index as idx">
-            <mat-label>Couples in heat #{{ idx + 1 }}</mat-label>
-            <input matInput type="number" min="1" [formControl]="formControl">
-          </mat-form-field>
-        </div>
-      </form>
-      <p class="mat-small mat-error" *ngIf="nextRoundFormGroup.getError('heatsize-mismatch') > 0">
-        Heatsize mismatch: You require {{ nextRoundFormGroup.getError('heatsize-mismatch') }} couple(s) too many for
-        this round.
-      </p>
-      <p class="mat-small mat-error" *ngIf="nextRoundFormGroup.getError('heatsize-mismatch') < 0">
-        Heatsize mismatch: You require {{ -1 * nextRoundFormGroup.getError('heatsize-mismatch') }} couple(s) too little
-        for this round.
-      </p>
-
-      <ng-container *ngFor="let couples of round.heats; index as idx">
-        <h1>Heat #{{ idx + 1}}</h1>
-        <table mat-table [dataSource]="couples">
-
-          <ng-container matColumnDef="lead">
-            <th mat-header-cell *matHeaderCellDef>Lead</th>
-            <td mat-cell *matCellDef="let element">{{element.lead}}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="follow">
-            <th mat-header-cell *matHeaderCellDef>Follow</th>
-            <td mat-cell *matCellDef="let element">{{element.follow}}</td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="[ 'lead', 'follow' ]"></tr>
-          <tr mat-row *matRowDef="let row; columns: [ 'lead', 'follow' ];"></tr>
-        </table>
-      </ng-container>
-
+      <app-draft-round-component #draftRounds [round]="round"></app-draft-round-component>
     </mat-card-content>
     <mat-card-actions align="end">
       <button type="button" class="flex-auto" mat-raised-button color="primary"
-              (click)="roundsService.suggestDraw($any(this.nextRoundFormGroup.controls.heatSizes.value)).subscribe()"
-              [disabled]="nextRoundFormGroup.invalid">Suggest new draw
+              (click)="roundsService.suggestDraw(draftRounds.heatSizes).subscribe()"
+              [disabled]="draftRounds.invalid">Suggest new draw
+      </button>
+      <button type="button" class="flex-auto" mat-raised-button color="primary"
+              (click)="roundsService.startRound().subscribe()"
+              [disabled]="round.heats.length === 0">Start round
       </button>
     </mat-card-actions>
   </mat-card>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, switchMap, tap, throwError } from 'rxjs';
+import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
 import { Couple, generateId, Participant, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
@@ -33,9 +33,10 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
     returnValue.push([]);
     for (let couple = 0; couple < value[heat]; couple++) {
       returnValue[heat].push({
+        id: generateId(),
+        type: '',
         lead: leads[couple].id,
         follow: follows[couple].id,
-        points: 0
       });
     }
   }
@@ -89,19 +90,19 @@ export class RoundsService {
     return round1.number - round2.number;
   }
 
-  public canDraw(value: number[]): Observable<number> {
+  public canDraw(value: (null | number)[]): Observable<number> {
     return this.participantsService.locked.pipe(
       filter(x => x),
       switchMap(() => this.participantsService.participants),
       first(),
       map(participants => {
-        const expected = value.reduce((p1, p2) => p1 + p2, 0);
-        return expected - participants.length / 2;
+        const expected = value.reduce((p1, p2) => (p1 ?? 0) + (p2 ?? 0), 0);
+        return (expected ?? 0) - participants.length / 2;
       })
     );
   }
 
-  public suggestDraw(value: number[]): Observable<null> {
+  public suggestDraw(value: (null | number)[]): Observable<null> {
     return this.canDraw(value).pipe(
       switchMap(mismatch => {
         if (mismatch !== 0) {
@@ -116,9 +117,19 @@ export class RoundsService {
           x => x.state === 'DRAFT',
           x => ({
             ...x,
-            heats: drawCouples(value, participants)
+            heats: drawCouples(value.map(x => x ?? 0), participants)
           })
         );
+      })
+    );
+  }
+
+  public startRound() {
+    return this.storageService.edit('Round',
+      x => x.state === 'DRAFT',
+      x => ({
+        ...x,
+        state: 'STARTED'
       })
     );
   }

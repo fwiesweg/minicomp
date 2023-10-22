@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ParticipantsService } from 'src/app/data/participants.service';
 import { MatTable } from '@angular/material/table';
-import { Id, Participant, ParticipantType, Role } from 'src/app/data/model.base';
-import { catchError, filter, map, of, Subscription, tap } from 'rxjs';
+import { Participant, Role, trackById } from 'src/app/data/model.base';
+import { catchError, map, of, Subscription, tap } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -34,6 +34,8 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
 
   @ViewChild(MatTable)
   public table!: MatTable<Participant>;
+
+  public readonly id = trackById;
 
   ngOnInit(): void {
     this.subscription.add(this.participantsService.participants.pipe(

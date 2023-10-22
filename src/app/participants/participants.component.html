@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="participantsService.participants">
+<table mat-table [dataSource]="participantsService.participants" [trackBy]="id">
 
   <ng-container matColumnDef="firstName">
     <th mat-header-cell *matHeaderCellDef>First name</th>
