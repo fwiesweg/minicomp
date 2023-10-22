@@ -60,17 +60,19 @@ export interface ParticipantFollow extends Participant {
 }
 
 export type RoundType = 'Round';
+export type RoundState = 'DRAFT' | 'STARTED' | 'EVALUATED';
 
 export interface Round extends Base {
   type: RoundType;
+  number: number;
 
-  name: string;
-  heats: Couple[][]
+  state: RoundState
+  heats: readonly Couple[][]
 }
 
 export interface Couple {
-  lead: ParticipantLead
-  follow: ParticipantFollow
+  lead: Id
+  follow: Id
 
   points: number | null;
 }

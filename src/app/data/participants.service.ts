@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { BaseInput, generateId, Participant } from 'src/app/data/model.base';
-import { combineLatest, first, map, Observable, switchMap, throwError } from 'rxjs';
+import { combineLatest, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
 import { StorageService } from 'src/app/data/storage.service';
 import { State } from 'src/app/data/model.singleton';
 
@@ -9,7 +9,6 @@ import { State } from 'src/app/data/model.singleton';
   providedIn: 'root'
 })
 export class ParticipantsService {
-
   private static sort(p1: Participant, p2: Participant) {
     let result: number;
 
@@ -22,16 +21,16 @@ export class ParticipantsService {
     return p1.id.localeCompare(p2.id);
   }
 
+  public readonly locked: Observable<boolean>;
+  public readonly participants: Observable<Participant[]>;
+
   constructor(private storageService: StorageService) {
-  }
-
-  public get locked() {
-    return this.storageService.readSingleton('State').pipe(
+    this.locked = this.storageService.readSingleton('State').pipe(
       map(state => state.locked));
-  }
-
-  public get participants() {
-    return this.storageService.read('Participant');
+    this.participants = this.storageService.read('Participant').pipe(
+      map(x => x.sort(ParticipantsService.sort)),
+      shareReplay(1)
+    );
   }
 
   private edit<T>(editFunction: ((state: State, participants: Participant[]) => Observable<T>)): Observable<T> {
@@ -52,7 +51,7 @@ export class ParticipantsService {
         id: generateId(),
         type: 'Participant',
       } as Required<Participant> ]
-      participants.sort(ParticipantsService.sort)
+      participants.sort(ParticipantsService.sort);
       return this.storageService.store('Participant', participants)
     });
   }
@@ -60,7 +59,6 @@ export class ParticipantsService {
   public removeParticipant(input: Participant): Observable<null> {
     return this.edit((state, participants) => {
       participants = participants.filter(x => x.id != input.id);
-      participants.sort(ParticipantsService.sort)
       return this.storageService.store('Participant', participants);
     });
   }

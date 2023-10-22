@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { delay, filter, map, Subscription, tap } from 'rxjs';
+import { delay, filter, map, of, Subscription, tap } from 'rxjs';
 
 @Component({
   selector: 'app-rounds',
@@ -10,7 +10,6 @@ import { delay, filter, map, Subscription, tap } from 'rxjs';
 })
 export class RoundsComponent implements OnDestroy {
   constructor(public roundsService: RoundsService) {
-
     this.subscription.add(this.nextRoundFormGroup.controls.heats.valueChanges.pipe(
       filter(x => x != null),
       map(x => x as number),
@@ -36,5 +35,9 @@ export class RoundsComponent implements OnDestroy {
   public nextRoundFormGroup = new FormGroup({
     heats: new FormControl<null | number>(null, [ Validators.required ]),
     heatSizes: new FormArray<FormControl<null | number>>([])
-  });
+  }, null, [ () => {
+    return this.roundsService.previousRound
+
+    return of(null);
+  } ]);
 }
