@@ -9,6 +9,9 @@ const routes: Routes = [ {
 }, {
   path: 'rounds',
   component: RoundsComponent,
+}, {
+  path: '**',
+  redirectTo: 'participants'
 } ];
 
 @NgModule({

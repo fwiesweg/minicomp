@@ -16,7 +16,6 @@ export class RoundsComponent implements OnDestroy {
       map(x => x as number),
       delay(200),
       tap(x => {
-        console.log(x);
         while (x > this.nextRoundFormGroup.controls.heatSizes.length) {
           this.nextRoundFormGroup.controls.heatSizes.push(new FormControl<number | null>(null, [ Validators.required ]));
         }
