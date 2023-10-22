@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, generateId, Participant, Round } from 'src/app/data/model.base';
+import { Couple, generateId, Participant, Result, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 
 const drawCouples = (value: number[], participants: Participant[]): Couple[][] => {
@@ -71,12 +71,13 @@ export class RoundsService {
         } else if (locked && rounds.length == 0) {
           return this.participantsService.participants.pipe(
             first(),
-            map(p => ({
+            map(() => ({
               id: generateId(),
               type: 'Round',
               number: 0,
               state: 'DRAFT',
-              heats: []
+              heats: [],
+              results: []
             }) as const),
             switchMap(round => this.storageService.store('Round', [round]))
           );
@@ -134,7 +135,14 @@ export class RoundsService {
     );
   }
 
-  public evaluateRound() {
-    return EMPTY;
+  public evaluateRound(results: Result[]) {
+    return this.storageService.edit('Round',
+      x => x.state === 'STARTED',
+      x => ({
+        ...x,
+        results: results.sort((r1, r2) => r2.points - r1.points),
+        state: 'EVALUATED'
+      })
+    );
   }
 }

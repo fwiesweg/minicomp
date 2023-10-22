@@ -29,7 +29,7 @@
     </mat-card-content>
     <mat-card-actions align="end">
       <button type="button" class="flex-auto" mat-raised-button color="primary"
-              (click)="roundsService.evaluateRound().subscribe()"
+              (click)="roundsService.evaluateRound(startedRounds.forStorage()).subscribe()"
               [disabled]="startedRounds.invalid">Evaluate round
       </button>
     </mat-card-actions>

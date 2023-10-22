@@ -6,10 +6,10 @@ import { Couple, Round, trackById, trackByIdx } from 'src/app/data/model.base';
 
 @Component({
   selector: 'app-draft-round-component',
-  templateUrl: './draft-round-component.component.html',
-  styleUrls: [ './draft-round-component.component.scss' ]
+  templateUrl: './draft-round.component.html',
+  styleUrls: [ './draft-round.component.scss' ]
 })
-export class DraftRoundComponentComponent implements OnDestroy {
+export class DraftRoundComponent implements OnDestroy {
 
   constructor(public roundsService: RoundsService) {
     this.subscription.add(this.formGroup.controls.heats.valueChanges.pipe(

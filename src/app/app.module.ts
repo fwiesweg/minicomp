@@ -16,15 +16,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { LocalStorageService, StorageService } from 'src/app/data/storage.service';
-import { DraftRoundComponentComponent } from './rounds/draft-round-component/draft-round-component.component';
-import { StartedRoundComponent } from 'src/app/rounds/started-round-component/started-round.component';
+import { DraftRoundComponent } from 'src/app/rounds/draft-round-component/draft-round.component';
+import { StartedRoundComponent } from 'src/app/rounds/started-round/started-round.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ParticipantsComponent,
     RoundsComponent,
-    DraftRoundComponentComponent,
+    DraftRoundComponent,
     StartedRoundComponent,
   ],
   imports: [

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StartedRoundComponent } from 'src/app/rounds/started-round-component/started-round.component';
+import { StartedRoundComponent } from 'src/app/rounds/started-round/started-round.component';
 
 describe('formGroup', () => {
   let component: StartedRoundComponent;

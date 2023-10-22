@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { Subscription } from 'rxjs';
-import { Couple, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { Couple, Result, Round, trackById, trackByIdx } from 'src/app/data/model.base';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -64,5 +64,30 @@ export class StartedRoundComponent implements OnDestroy {
 
   public get invalid() {
     return this.formArray.invalid;
+  }
+
+  public forStorage() {
+    if (this.round == null) throw Error();
+
+    const results: Result[] = [];
+    for (let i = 0; i < this.formArray.length; i++) {
+      const innerFormArray = this.formArray.at(i);
+      for (let j = 0; j < innerFormArray.length; j++) {
+        const points = innerFormArray.at(j).value;
+        if (points == null) throw Error();
+
+        results.push({
+          participant: this.round.heats[i][j].lead,
+          points: points
+        });
+
+        results.push({
+          participant: this.round.heats[i][j].follow,
+          points: points
+        });
+      }
+    }
+
+    return results;
   }
 }

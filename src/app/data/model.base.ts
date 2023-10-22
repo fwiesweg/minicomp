@@ -71,6 +71,7 @@ export interface Round extends Base {
 
   state: RoundState
   heats: readonly Couple[][]
+  results: readonly Result[]
 }
 
 export interface Couple extends Base {
@@ -78,4 +79,9 @@ export interface Couple extends Base {
 
   lead: Id
   follow: Id
+}
+
+export interface Result {
+  participant: Id;
+  points: number;
 }
