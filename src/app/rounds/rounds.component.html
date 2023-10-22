@@ -17,13 +17,22 @@
     </mat-card-header>
     <mat-card-content>
       RESULTS
-    </mat-card-content>DRAFT
+    </mat-card-content>
   </mat-card>
 
   <mat-card class="main-card" *ngIf="round.state === 'STARTED'">
     <mat-card-header>
       <mat-card-title>Current round: #{{round.number + 1}}</mat-card-title>
     </mat-card-header>
+    <mat-card-content>
+      <app-started-round-component #startedRounds [round]="round"></app-started-round-component>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button type="button" class="flex-auto" mat-raised-button color="primary"
+              (click)="roundsService.evaluateRound().subscribe()"
+              [disabled]="startedRounds.invalid">Evaluate round
+      </button>
+    </mat-card-actions>
   </mat-card>
 
   <mat-card class="main-card" *ngIf="round.state === 'DRAFT'">

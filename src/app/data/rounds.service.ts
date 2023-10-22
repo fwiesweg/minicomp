@@ -133,4 +133,8 @@ export class RoundsService {
       })
     );
   }
+
+  public evaluateRound() {
+    return EMPTY;
+  }
 }
