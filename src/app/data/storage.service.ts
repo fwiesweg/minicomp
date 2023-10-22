@@ -25,19 +25,7 @@ type SingletonSubjects = { [key in SingletonType]: BehaviorSubject<SingletonType
 export class BehaviorSubjectStorageService extends StorageService {
 
   private baseSubjects: BaseSubjects = {
-    Participant: new BehaviorSubject<Participant[]>(/*[ {
-      id: generateId(),
-      type: 'Participant',
-      firstName: 'Florian',
-      lastName: 'Wiesweg',
-      role: 'LEAD',
-    }, {
-      id: generateId(),
-      type: 'Participant',
-      firstName: 'Michèle-Rose',
-      lastName: 'Gorovoy',
-      role: 'FOLLOW',
-    } ]*/[]),
+    Participant: new BehaviorSubject<Participant[]>([]),
     Round: new BehaviorSubject<Round[]>([] as Round[]),
   }
 
