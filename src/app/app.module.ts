@@ -18,6 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { LocalStorageService, StorageService } from 'src/app/data/storage.service';
 import { DraftRoundComponent } from 'src/app/rounds/draft-round-component/draft-round.component';
 import { StartedRoundComponent } from 'src/app/rounds/started-round/started-round.component';
+import { EvaluatedRoundComponent } from 'src/app/rounds/evaluated-round/evaluated-round.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { StartedRoundComponent } from 'src/app/rounds/started-round/started-roun
     RoundsComponent,
     DraftRoundComponent,
     StartedRoundComponent,
+    EvaluatedRoundComponent
   ],
   imports: [
     BrowserModule,

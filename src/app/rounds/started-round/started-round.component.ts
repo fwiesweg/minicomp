@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { Subscription } from 'rxjs';
-import { Couple, Result, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { Couple, Participant, ParticipantResult, Result, Round, trackById, trackByIdx } from 'src/app/data/model.base';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -69,25 +69,31 @@ export class StartedRoundComponent implements OnDestroy {
   public forStorage() {
     if (this.round == null) throw Error();
 
-    const results: Result[] = [];
+    const leads: ParticipantResult[] = [];
+    const follows: ParticipantResult[] = [];
     for (let i = 0; i < this.formArray.length; i++) {
       const innerFormArray = this.formArray.at(i);
       for (let j = 0; j < innerFormArray.length; j++) {
         const points = innerFormArray.at(j).value;
         if (points == null) throw Error();
 
-        results.push({
-          participant: this.round.heats[i][j].lead,
+        leads.push({
+          id: this.round.heats[i][j].lead,
+          type: '',
           points: points
         });
 
-        results.push({
-          participant: this.round.heats[i][j].follow,
+        follows.push({
+          id: this.round.heats[i][j].follow,
+          type: '',
           points: points
         });
       }
     }
 
-    return results;
+    return {
+      leads: leads.sort((r1, r2) => r2.points - r1.points),
+      follows: follows.sort((r1, r2) => r2.points - r1.points),
+    };
   }
 }

@@ -13,11 +13,16 @@
 <ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id">
   <mat-card class="main-card" *ngIf="round.state === 'EVALUATED'">
     <mat-card-header>
-      <mat-card-title>Previous round: #{{round.number + 1}}</mat-card-title>
+      <mat-card-title>Evaluated round: #{{round.number + 1}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      RESULTS
+      <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
     </mat-card-content>
+    <mat-card-actions align="end">
+      <button type="button" class="flex-auto" mat-raised-button color="primary"
+              (click)="roundsService.nextRound(evaluatedRounds.forStorage()).subscribe()"
+              [disabled]="evaluatedRounds.invalid">Prepare next round</button>
+    </mat-card-actions>
   </mat-card>
 
   <mat-card class="main-card" *ngIf="round.state === 'STARTED'">

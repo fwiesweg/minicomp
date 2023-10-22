@@ -21,7 +21,6 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
       array[i] = array[j];
       array[j] = ip;
     }
-
     return array;
   };
 
@@ -29,15 +28,18 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
   shuffle(follows);
 
   const returnValue: Couple[][] = [];
+  let couple = 0;
   for (let heat = 0; heat < value.length; heat++) {
     returnValue.push([]);
-    for (let couple = 0; couple < value[heat]; couple++) {
+    for (let coupleInHeat = 0; coupleInHeat < value[heat]; coupleInHeat++) {
       returnValue[heat].push({
         id: generateId(),
         type: '',
         lead: leads[couple].id,
         follow: follows[couple].id,
       });
+
+      couple++;
     }
   }
 
@@ -77,7 +79,10 @@ export class RoundsService {
               number: 0,
               state: 'DRAFT',
               heats: [],
-              results: []
+              results: {
+                leads: [],
+                follows: [],
+              }
             }) as const),
             switchMap(round => this.storageService.store('Round', [round]))
           );
@@ -135,14 +140,18 @@ export class RoundsService {
     );
   }
 
-  public evaluateRound(results: Result[]) {
+  public evaluateRound(results: Result) {
     return this.storageService.edit('Round',
       x => x.state === 'STARTED',
       x => ({
         ...x,
-        results: results.sort((r1, r2) => r2.points - r1.points),
+        results: results,
         state: 'EVALUATED'
       })
     );
+  }
+
+  public nextRound(participants: Participant[]) {
+    return EMPTY;
   }
 }
