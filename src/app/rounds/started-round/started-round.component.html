@@ -1,5 +1,5 @@
-<ng-container *ngFor="let couples of heats; index as heatIdx; trackBy: idx">
-  <table mat-table [dataSource]="couples" [trackBy]="id">
+<ng-container *ngFor="let heat of heats; index as heatIdx; trackBy: idx">
+  <table mat-table [dataSource]="heat.couples" [trackBy]="id">
 
     <ng-container matColumnDef="lead">
       <th mat-header-cell *matHeaderCellDef>Heat #{{ heatIdx + 1}}, Lead</th>

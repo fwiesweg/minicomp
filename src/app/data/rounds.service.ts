@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, generateId, Participant, Result, Round } from 'src/app/data/model.base';
+import { Couple, DANCE, generateId, Participant, Result, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 
 const drawCouples = (value: number[], participants: Participant[]): Couple[][] => {
@@ -49,7 +49,7 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
 @Injectable({
   providedIn: 'root'
 })
-export class RoundsService {
+export class RoundsService implements OnDestroy {
 
   public readonly rounds: Observable<Round[]>;
 
@@ -66,7 +66,7 @@ export class RoundsService {
       map(x => x[x.length - 1])
     );
 
-    combineLatest([ this.participantsService.locked, this.rounds ]).pipe(
+    this.subscription.add(combineLatest([ this.participantsService.locked, this.rounds ]).pipe(
       switchMap(([ locked, rounds ]) => {
         if (!locked && rounds.length > 0) {
           return this.storageService.store('Round', []);
@@ -89,7 +89,13 @@ export class RoundsService {
         } else {
           return EMPTY;
         }
-      })).subscribe();
+      })).subscribe());
+  }
+
+  private subscription = new Subscription();
+
+  public ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   private static sort(round1: Round, round2: Round) {
@@ -123,7 +129,16 @@ export class RoundsService {
           x => x.state === 'DRAFT',
           x => ({
             ...x,
-            heats: drawCouples(value.map(x => x ?? 0), participants)
+            heats: DANCE.flatMap(dance => {
+              const couples = drawCouples(value.map(x => x ?? 0), participants);
+
+              return couples.map((cpls, idx) => ({
+                id: `${idx + 1}`,
+                type: '',
+                couples: cpls,
+                dance: dance
+              }));
+            })
           })
         );
       })

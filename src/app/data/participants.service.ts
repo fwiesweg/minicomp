@@ -54,7 +54,7 @@ export class ParticipantsService {
         type: 'Participant',
       } as Required<Participant> ]
       participants.sort(ParticipantsService.sort);
-      return this.storageService.store('Participant', participants)
+      return this.storageService.store('Participant', participants);
     });
   }
 

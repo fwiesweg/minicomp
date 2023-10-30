@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { delay, filter, map, of, Subscription, tap } from 'rxjs';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Couple, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { Heat, Round, trackById, trackByIdx } from 'src/app/data/model.base';
 
 @Component({
   selector: 'app-draft-round-component',
@@ -59,7 +59,7 @@ export class DraftRoundComponent implements OnDestroy {
 
   public readonly idx = trackByIdx;
 
-  public get heats(): readonly Couple[][] {
+  public get heats(): readonly Heat[] {
     if (this.round == null) return [];
     else return this.round.heats;
   }

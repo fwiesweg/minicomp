@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { Subscription } from 'rxjs';
-import { Couple, Participant, ParticipantResult, Result, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { Heat, Id, ParticipantResult, Round, trackById, trackByIdx } from 'src/app/data/model.base';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -44,7 +44,7 @@ export class StartedRoundComponent implements OnDestroy {
 
     for (let i = 0; i < this.formArray.length; i++) {
       const innerFormArray = this.formArray.at(i);
-      while (innerFormArray.length < value.heats[i].length) {
+      while (innerFormArray.length < value.heats[i].couples.length) {
         innerFormArray.push(new FormControl<number>(0, [ Validators.required ]));
       }
     }
@@ -57,7 +57,7 @@ export class StartedRoundComponent implements OnDestroy {
 
   public readonly formArray = new FormArray<FormArray<FormControl<null | number>>>([]);
 
-  public get heats(): readonly Couple[][] {
+  public get heats(): readonly Heat[] {
     if (this.round == null) return [];
     else return this.round.heats;
   }
@@ -69,31 +69,43 @@ export class StartedRoundComponent implements OnDestroy {
   public forStorage() {
     if (this.round == null) throw Error();
 
-    const leads: ParticipantResult[] = [];
-    const follows: ParticipantResult[] = [];
+    const leads = new Map<Id, ParticipantResult>();
+    const follows = new Map<Id, ParticipantResult>();
     for (let i = 0; i < this.formArray.length; i++) {
       const innerFormArray = this.formArray.at(i);
       for (let j = 0; j < innerFormArray.length; j++) {
         const points = innerFormArray.at(j).value;
         if (points == null) throw Error();
 
-        leads.push({
-          id: this.round.heats[i][j].lead,
-          type: '',
-          points: points
-        });
+        const leadId = this.round.heats[i].couples[j].lead;
+        let lead = leads.get(leadId);
+        if (lead == null) {
+          lead = {
+            id: this.round.heats[i].couples[j].lead,
+            type: '',
+            points: 0
+          };
+          leads.set(leadId, lead);
+        }
+        lead.points += points;
 
-        follows.push({
-          id: this.round.heats[i][j].follow,
-          type: '',
-          points: points
-        });
+        const followId = this.round.heats[i].couples[j].follow;
+        let follow = follows.get(followId);
+        if (follow == null) {
+          follow = {
+            id: followId,
+            type: '',
+            points: 0
+          };
+          follows.set(followId, follow);
+        }
+        follow.points += points;
       }
     }
 
     return {
-      leads: leads.sort((r1, r2) => r2.points - r1.points),
-      follows: follows.sort((r1, r2) => r2.points - r1.points),
+      leads: Array(...leads.values()).sort((r1, r2) => r2.points - r1.points),
+      follows: Array(...follows.values()).sort((r1, r2) => r2.points - r1.points),
     };
   }
 }

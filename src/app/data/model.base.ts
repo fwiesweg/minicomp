@@ -54,14 +54,9 @@ export interface Participant extends Base {
   role: Role
 }
 
-export interface ParticipantLead extends Participant {
-  role: 'LEAD';
-}
-
-export interface ParticipantFollow extends Participant {
-  role: 'FOLLOW';
-}
-
+export type ArrayElement<A> = A extends readonly (infer T)[] ? T : never;
+export const DANCE = [ 'Slow Waltz', 'ChaChaCha', 'Tango', 'Rumba', 'Quick Step', 'Jive' ] as const;
+export type Dance = ArrayElement<typeof DANCE>;
 export type RoundType = 'Round';
 export type RoundState = 'DRAFT' | 'STARTED' | 'EVALUATED';
 
@@ -70,8 +65,15 @@ export interface Round extends Base {
   number: number;
 
   state: RoundState
-  heats: readonly Couple[][]
+  heats: readonly Heat[]
   results: Result
+}
+
+export interface Heat extends Base {
+  type: '';
+
+  dance: Dance,
+  couples: Couple[]
 }
 
 export interface Couple extends Base {
