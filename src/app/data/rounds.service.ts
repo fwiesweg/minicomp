@@ -86,7 +86,8 @@ export class RoundsService implements OnDestroy {
 
     this.currentRound = this.rounds.pipe(
       filter(x => x.length > 0),
-      map(x => x[x.length - 1])
+      map(x => x[x.length - 1]),
+      shareReplay(1)
     );
 
     this.subscription.add(combineLatest([ this.participantsService.locked, this.rounds ]).pipe(
@@ -191,7 +192,7 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public nextRound(starters: { leads: Id[], follows: Id[] }) {
+  public finishRound(starters: { leads: Id[], follows: Id[] }, startNext: boolean) {
     return this.currentRound.pipe(
       first(),
       switchMap(x => this.storageService.edit('Round', r => r.id === x.id, r => ({
@@ -199,6 +200,7 @@ export class RoundsService implements OnDestroy {
         state: 'SUPERSEEDED',
         couplesKept: starters.leads.length
       })).pipe(map(() => x.number))),
+      filter(() => startNext),
       map(round => generateRound(round + 1, starters)),
       switchMap(x => this.storageService.add('Round', x))
     );

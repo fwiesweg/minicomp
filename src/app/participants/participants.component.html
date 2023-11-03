@@ -88,8 +88,11 @@
   </mat-card-header>
   <mat-card-content>
     <p>The competition has been started. You cannot edit participants without resetting the competition.</p>
+    <p>When resetting the competition, all rounds so far will be lost and will have to be re-danced (or at least entered again).</p>
   </mat-card-content>
-  <mat-card-actions align="end">
-    <a class="flex-auto" mat-raised-button color="primary" routerLink="../rounds">Show rounds</a>
+  <mat-card-actions>
+    <button type="button" class="flex-auto" mat-button (click)="participantsService.unlock().subscribe()">Reset rounds</button>
+    <div class="flex-fill"></div>
+    <a class="flex-auto" mat-raised-button color="primary" routerLink="../current-rounds">Show current round</a>
   </mat-card-actions>
 </mat-card>

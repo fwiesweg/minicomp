@@ -1,0 +1,19 @@
+<ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id;">
+  <mat-card class="main-card" *ngIf="round.state === 'SUPERSEEDED'">
+    <mat-card-header>
+      <mat-card-title>Evaluated round: #{{round.number}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
+    </mat-card-content>
+  </mat-card>
+</ng-container>
+
+<mat-card class="main-card" *ngIf="noPreviousRounds | async">
+  <mat-card-content>
+    <p>No round has been evaluated yet.</p>
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <a mat-raised-button color="primary" class="flex-auto" type="button" routerLink="../current-rounds">Show current round</a>
+  </mat-card-actions>
+</mat-card>

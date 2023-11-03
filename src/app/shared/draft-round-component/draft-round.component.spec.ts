@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DraftRoundComponent } from 'src/app/rounds/draft-round-component/draft-round.component';
+import { DraftRoundComponent } from './draft-round.component';
 
 describe('DraftRoundComponent', () => {
   let component: DraftRoundComponent;

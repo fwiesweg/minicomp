@@ -10,17 +10,31 @@
   </mat-card-actions>
 </mat-card>
 
+<mat-card class="main-card" *ngIf="(noCurrentRounds | async) && (participantsService.locked | async) ">
+  <mat-card-content>
+    <p>This competition has been terminated.</p>
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <a mat-raised-button color="primary" class="flex-auto" type="button" routerLink="../previous-rounds">Show previous rounds</a>
+  </mat-card-actions>
+</mat-card>
+
+
 <ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id;">
-  <mat-card class="main-card" *ngIf="round.state === 'EVALUATED' || round.state === 'SUPERSEEDED'">
+  <mat-card class="main-card" *ngIf="round.state === 'EVALUATED'">
     <mat-card-header>
       <mat-card-title>Evaluated round: #{{round.number}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
     </mat-card-content>
-    <mat-card-actions align="end" *ngIf="round?.state === 'EVALUATED'">
+    <mat-card-actions>
+      <button type="button" class="flex-auto" mat-button
+              (click)="roundsService.finishRound(evaluatedRounds.forStorage(), false).subscribe()"
+              [disabled]="evaluatedRounds.invalid">End competition</button>
+      <div class="flex-fill"></div>
       <button type="button" class="flex-auto" mat-raised-button color="primary"
-              (click)="roundsService.nextRound(evaluatedRounds.forStorage()).subscribe()"
+              (click)="roundsService.finishRound(evaluatedRounds.forStorage(), true).subscribe()"
               [disabled]="evaluatedRounds.invalid">Prepare next round</button>
     </mat-card-actions>
   </mat-card>
@@ -59,15 +73,3 @@
     </mat-card-actions>
   </mat-card>
 </ng-container>
-
-<mat-card class="main-card" *ngIf="participantsService.locked | async">
-  <mat-card-content>
-    <p>You can reset the rounds to unlock the participants. However, all rounds so far will be lost and will have to be
-      re-danced.</p>
-  </mat-card-content>
-  <mat-card-actions align="end">
-    <a mat-raised-button color="primary" class="flex-auto" type="button"
-       (click)="participantsService.unlock().subscribe()">Reset rounds</a>
-  </mat-card-actions>
-
-</mat-card>

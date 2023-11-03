@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RoundsComponent } from './rounds.component';
+import { CurrentRoundsComponent } from './current-rounds.component';
 
 describe('RoundsComponent', () => {
-  let component: RoundsComponent;
-  let fixture: ComponentFixture<RoundsComponent>;
+  let component: CurrentRoundsComponent;
+  let fixture: ComponentFixture<CurrentRoundsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RoundsComponent]
+      declarations: [CurrentRoundsComponent]
     });
-    fixture = TestBed.createComponent(RoundsComponent);
+    fixture = TestBed.createComponent(CurrentRoundsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

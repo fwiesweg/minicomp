@@ -6,7 +6,6 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ParticipantsComponent } from './participants/participants.component';
-import { RoundsComponent } from './rounds/rounds.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,32 +15,39 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { LocalStorageService, StorageService } from 'src/app/data/storage.service';
-import { DraftRoundComponent } from 'src/app/rounds/draft-round-component/draft-round.component';
-import { StartedRoundComponent } from 'src/app/rounds/started-round/started-round.component';
-import { EvaluatedRoundComponent } from 'src/app/rounds/evaluated-round/evaluated-round.component';
+import { DraftRoundComponent } from 'src/app/shared/draft-round-component/draft-round.component';
+import { EvaluatedRoundComponent } from 'src/app/shared/evaluated-round/evaluated-round.component';
+import { StartedRoundComponent } from 'src/app/shared/started-round/started-round.component';
+import { PreviousRoundsComponent } from 'src/app/previous-rounds/previous-rounds.component';
+import { CurrentRoundsComponent } from 'src/app/current-rounds/current-rounds.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+
+    CurrentRoundsComponent,
     ParticipantsComponent,
-    RoundsComponent,
+    PreviousRoundsComponent,
+
     DraftRoundComponent,
-    StartedRoundComponent,
-    EvaluatedRoundComponent
+    EvaluatedRoundComponent,
+    StartedRoundComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
     BrowserAnimationsModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatTableModule,
-    MatIconModule,
-    MatCardModule,
     ReactiveFormsModule,
+
+    MatButtonModule,
+    MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTableModule,
+    MatToolbarModule,
+
+    AppRoutingModule,
   ],
   providers: [ {
     provide: StorageService,

@@ -28,8 +28,8 @@ export class ParticipantsService {
 
   constructor(private storageService: StorageService) {
     this.locked = this.storageService.readSingleton('State').pipe(
-      map(state => state.locked));
-    this.unlocked = this.locked.pipe(map(x => !x));
+      map(state => state.locked), shareReplay(1));
+    this.unlocked = this.locked.pipe(map(x => !x), shareReplay(1));
     this.participants = this.storageService.read('Participant').pipe(
       map(x => x.sort(ParticipantsService.sort)),
       shareReplay(1)
