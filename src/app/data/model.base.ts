@@ -58,7 +58,7 @@ export type ArrayElement<A> = A extends readonly (infer T)[] ? T : never;
 export const DANCE = [ 'Slow Waltz', 'ChaChaCha', 'Tango', 'Rumba', 'Quick Step', 'Jive' ] as const;
 export type Dance = ArrayElement<typeof DANCE>;
 export type RoundType = 'Round';
-export type RoundState = 'DRAFT' | 'STARTED' | 'EVALUATED';
+export type RoundState = 'DRAFT' | 'STARTED' | 'EVALUATED' | 'SUPERSEEDED';
 
 export interface Round extends Base {
   type: RoundType;
@@ -67,6 +67,7 @@ export interface Round extends Base {
   state: RoundState
   heats: readonly Heat[]
   results: Result
+  couplesKept: null | number;
 }
 
 export interface Heat extends Base {

@@ -15,7 +15,7 @@ export class EvaluatedRoundComponent {
 
   private _round: null | Round = null;
 
-  public numberOfCouplesFormControl = new FormControl<null | number>(null,
+  public couplesKeptFormControl = new FormControl<null | number>(null,
     [ Validators.required, Validators.min(1), Validators.max(1) ]);
 
   public get round(): null | Round {
@@ -27,7 +27,7 @@ export class EvaluatedRoundComponent {
     if (this._round == value) return;
 
     this._round = value;
-    this.numberOfCouplesFormControl = new FormControl<null | number>(null,
+    this.couplesKeptFormControl = new FormControl<null | number>(null,
       [ Validators.required, Validators.min(1), Validators.max(value?.results.leads.length ?? 0) ]);
   }
 
@@ -38,22 +38,30 @@ export class EvaluatedRoundComponent {
   }
 
   public get invalid() {
-    return this.numberOfCouplesFormControl.invalid;
+    return this.couplesKeptFormControl.invalid;
   }
 
 
   public forStorage(): { leads: Id[], follows: Id[] } {
     if (this._round == null) {
       throw new Error();
-    } else if(this.numberOfCouplesFormControl.value == null) {
+    } else if (this.couplesKeptFormControl.value == null) {
       throw new Error();
     }
 
     return {
-      leads: this._round.results.leads.slice(0, this.numberOfCouplesFormControl.value).map(x => x.id),
-      follows: this._round.results.follows.slice(0, this.numberOfCouplesFormControl.value).map(x => x.id)
+      leads: this._round.results.leads.slice(0, this.couplesKeptFormControl.value).map(x => x.id),
+      follows: this._round.results.follows.slice(0, this.couplesKeptFormControl.value).map(x => x.id)
     };
   }
 
   public readonly id = trackById;
+
+  public qualified(idx: number) {
+    if (this._round?.state === 'EVALUATED')
+      return idx < (this.couplesKeptFormControl.value ?? 0);
+    else if (this._round?.state === 'SUPERSEEDED')
+      return idx < (this._round.couplesKept ?? 0);
+    return false;
+  }
 }

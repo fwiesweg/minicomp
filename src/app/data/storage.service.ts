@@ -15,7 +15,9 @@ export abstract class StorageService {
       edit: (data: BaseTypeMap[T]) => BaseTypeMap[T]) {
     return this.read(model).pipe(
       first(),
-      map(x => x.filter(filter).map(edit)),
+      map(x => x.map(y => {
+        return filter(y) ? edit(y) : y;
+      })),
       switchMap(x => this.store(model, x))
     );
   }
@@ -152,6 +154,7 @@ export class LocalStorageService extends BehaviorSubjectStorageService implement
   }
 
   public override store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null> {
+    console.log(model, data.length);
     localStorage.setItem(BASE_PREFIX + model, JSON.stringify(data));
     return super.store(model, data);
   }

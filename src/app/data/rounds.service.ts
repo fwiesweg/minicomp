@@ -44,14 +44,13 @@ const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] =>
   return returnValue;
 };
 
-const generateRound = (previous: Round | null, starters: { leads: Id[], follows: Id[] }): Round => {
+const generateRound = (roundNumber: number, starters: { leads: Id[], follows: Id[] }): Round => {
   if (starters.leads.length !== starters.follows.length) throw new Error('Unbalanced starters');
-  if(previous != null && previous?.state !== 'EVALUATED') throw new Error('Bad previous round state');
 
   return {
     id: generateId(),
     type: 'Round',
-    number: (previous?.number ?? 0) + 1,
+    number: roundNumber,
     state: 'DRAFT',
     heats: [],
     results: {
@@ -65,7 +64,8 @@ const generateRound = (previous: Round | null, starters: { leads: Id[], follows:
         type: '' as const,
         points: 0
       }))
-    }
+    },
+    couplesKept: null
   };
 };
 
@@ -96,7 +96,7 @@ export class RoundsService implements OnDestroy {
         } else if (locked && rounds.length == 0) {
           return this.participantsService.participants.pipe(
             first(),
-            map(p => generateRound(null, {
+            map(p => generateRound(1, {
               leads: p.filter(x => x.role === 'LEAD').map(x => x.id),
               follows: p.filter(x => x.role === 'FOLLOW').map(x => x.id)
             })),
@@ -148,7 +148,7 @@ export class RoundsService implements OnDestroy {
       first(),
       switchMap(round => {
         return this.storageService.edit('Round',
-          x => x.state === 'DRAFT',
+          x => x.id === round.id,
           x => ({
             ...x,
             heats: DANCE.flatMap(dance => {
@@ -170,9 +170,9 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public startRound() {
+  public startRound(round: Round) {
     return this.storageService.edit('Round',
-      x => x.state === 'DRAFT',
+      x => x.id === round.id,
       x => ({
         ...x,
         state: 'STARTED'
@@ -180,9 +180,9 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public evaluateRound(results: Result) {
+  public evaluateRound(round: Round, results: Result) {
     return this.storageService.edit('Round',
-      x => x.state === 'STARTED',
+      x => x.id === round.id,
       x => ({
         ...x,
         results: results,
@@ -193,7 +193,13 @@ export class RoundsService implements OnDestroy {
 
   public nextRound(starters: { leads: Id[], follows: Id[] }) {
     return this.currentRound.pipe(
-      map(round => generateRound(round, starters)),
+      first(),
+      switchMap(x => this.storageService.edit('Round', r => r.id === x.id, r => ({
+        ...r,
+        state: 'SUPERSEEDED',
+        couplesKept: starters.leads.length
+      })).pipe(map(() => x.number))),
+      map(round => generateRound(round + 1, starters)),
       switchMap(x => this.storageService.add('Round', x))
     );
   }
