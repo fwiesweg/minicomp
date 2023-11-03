@@ -1,12 +1,10 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, DANCE, generateId, Participant, Result, Round } from 'src/app/data/model.base';
+import { Couple, DANCE, generateId, Id, Result, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 
-const drawCouples = (value: number[], participants: Participant[]): Couple[][] => {
-  const leads = participants.filter(x => x.role == 'LEAD');
-  const follows = participants.filter(x => x.role == 'FOLLOW');
+const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] => {
 
   const randInt = (min: number, max: number) => {
     min = Math.ceil(min);
@@ -35,8 +33,8 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
       returnValue[heat].push({
         id: generateId(),
         type: '',
-        lead: leads[couple].id,
-        follow: follows[couple].id,
+        lead: leads[couple],
+        follow: follows[couple]
       });
 
       couple++;
@@ -46,6 +44,31 @@ const drawCouples = (value: number[], participants: Participant[]): Couple[][] =
   return returnValue;
 };
 
+const generateRound = (previous: Round | null, starters: { leads: Id[], follows: Id[] }): Round => {
+  if (starters.leads.length !== starters.follows.length) throw new Error();
+  if(previous?.state !== 'EVALUATED') throw new Error();
+
+  return {
+    id: generateId(),
+    type: 'Round',
+    number: (previous?.number ?? 0) + 1,
+    state: 'DRAFT',
+    heats: [],
+    results: {
+      leads: starters.leads.map(x => ({
+        id: x,
+        type: '' as const,
+        points: 0
+      })),
+      follows: starters.follows.map(x => ({
+        id: x,
+        type: '' as const,
+        points: 0
+      }))
+    }
+  };
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,7 +76,7 @@ export class RoundsService implements OnDestroy {
 
   public readonly rounds: Observable<Round[]>;
 
-  public readonly previousRound: Observable<Round>;
+  public readonly currentRound: Observable<Round>;
 
   constructor(private participantsService: ParticipantsService, private storageService: StorageService) {
     this.rounds = this.storageService.read('Round').pipe(
@@ -61,7 +84,7 @@ export class RoundsService implements OnDestroy {
       shareReplay(1)
     );
 
-    this.previousRound = this.rounds.pipe(
+    this.currentRound = this.rounds.pipe(
       filter(x => x.length > 0),
       map(x => x[x.length - 1])
     );
@@ -73,17 +96,10 @@ export class RoundsService implements OnDestroy {
         } else if (locked && rounds.length == 0) {
           return this.participantsService.participants.pipe(
             first(),
-            map(() => ({
-              id: generateId(),
-              type: 'Round',
-              number: 0,
-              state: 'DRAFT',
-              heats: [],
-              results: {
-                leads: [],
-                follows: [],
-              }
-            }) as const),
+            map(p => generateRound(null, {
+              leads: p.filter(x => x.role === 'LEAD').map(x => x.id),
+              follows: p.filter(x => x.role === 'FOLLOW').map(x => x.id)
+            })),
             switchMap(round => this.storageService.store('Round', [round]))
           );
         } else {
@@ -105,11 +121,17 @@ export class RoundsService implements OnDestroy {
   public canDraw(value: (null | number)[]): Observable<number> {
     return this.participantsService.locked.pipe(
       filter(x => x),
-      switchMap(() => this.participantsService.participants),
+      switchMap(() => this.currentRound),
       first(),
-      map(participants => {
-        const expected = value.reduce((p1, p2) => (p1 ?? 0) + (p2 ?? 0), 0);
-        return (expected ?? 0) - participants.length / 2;
+      map(round => {
+        if (round.state !== 'DRAFT') {
+          return NaN;
+        }
+
+        const couples = round.results.leads.length;
+        const expectedCouples = value.reduce((p1, p2) => (p1 ?? 0) + (p2 ?? 0), 0);
+
+        return (expectedCouples ?? 0) - couples;
       })
     );
   }
@@ -121,16 +143,19 @@ export class RoundsService implements OnDestroy {
           return throwError(() => mismatch);
         }
 
-        return this.participantsService.participants;
+        return this.currentRound;
       }),
       first(),
-      switchMap(participants => {
+      switchMap(round => {
         return this.storageService.edit('Round',
           x => x.state === 'DRAFT',
           x => ({
             ...x,
             heats: DANCE.flatMap(dance => {
-              const couples = drawCouples(value.map(x => x ?? 0), participants);
+              const couples = drawCouples(value.map(x => x ?? 0),
+                round.results.leads.map(x => x.id),
+                round.results.follows.map(x => x.id)
+              );
 
               return couples.map((cpls, idx) => ({
                 id: `${idx + 1}`,
@@ -166,7 +191,10 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public nextRound(participants: Participant[]) {
-    return EMPTY;
+  public nextRound(starters: { leads: Id[], follows: Id[] }) {
+    return this.currentRound.pipe(
+      map(round => generateRound(round, starters)),
+      switchMap(x => this.storageService.add('Round', x))
+    );
   }
 }

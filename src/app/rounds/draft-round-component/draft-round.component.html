@@ -13,11 +13,11 @@
     </mat-form-field>
   </div>
 </form>
-<p class="mat-small mat-error" *ngIf="formGroup.getError('heatsize-mismatch') > 0">
+<p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') > 0">
   Heatsize mismatch: You require {{ formGroup.getError('heatsize-mismatch') }} couple(s) too many for
   this round.
 </p>
-<p class="mat-small mat-error" *ngIf="formGroup.getError('heatsize-mismatch') < 0">
+<p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') < 0">
   Heatsize mismatch: You require {{ -1 * formGroup.getError('heatsize-mismatch') }} couple(s) too little
   for this round.
 </p>

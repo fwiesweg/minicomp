@@ -16,7 +16,7 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="[ 'position', 'lead', 'points' ]"></tr>
-  <tr mat-row *matRowDef="let row; columns: [ 'position', 'lead', 'points' ];"></tr>
+  <tr mat-row *matRowDef="let row; columns: [ 'position', 'lead', 'points' ]; index as idx" [class]="idx < (numberOfCouplesFormControl.value ?? 0) ? 'qualified' : 'not-qualified'"></tr>
 </table>
 
 <table mat-table [dataSource]="results.follows" [trackBy]="id">
@@ -37,5 +37,13 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="[ 'position', 'follow', 'points' ]"></tr>
-  <tr mat-row *matRowDef="let row; columns: [ 'position', 'follow', 'points' ];"></tr>
+  <tr mat-row *matRowDef="let row; columns: [ 'position', 'follow', 'points' ]; index as idx" [class]="idx < (numberOfCouplesFormControl.value ?? 0) ? 'qualified' : 'not-qualified'"></tr>
 </table>
+
+<div class="flex-row">
+  <div class="flex-auto" style="min-width: max(50%, 500px)"></div>
+  <mat-form-field class="flex-fill">
+    <mat-label>Number of couples in next round</mat-label>
+    <input matInput type="number" [formControl]="numberOfCouplesFormControl">
+  </mat-form-field>
+</div>

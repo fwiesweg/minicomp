@@ -20,6 +20,14 @@ export abstract class StorageService {
     );
   }
 
+  public add<T extends BaseType>(model: T, data: BaseTypeMap[T]): Observable<null> {
+    return this.read(model).pipe(
+      first(),
+      map(x => x.concat([ data ])),
+      switchMap(x => this.store(model, x))
+    );
+  }
+
   public abstract readSingleton<T extends SingletonType>(model: T): Observable<SingletonTypeMap[T]>;
 
   public abstract storeSingleton<T extends SingletonType>(model: T, data: SingletonTypeMap[T]): Observable<null>;
