@@ -154,7 +154,6 @@ export class LocalStorageService extends BehaviorSubjectStorageService implement
   }
 
   public override store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null> {
-    console.log(model, data.length);
     localStorage.setItem(BASE_PREFIX + model, JSON.stringify(data));
     return super.store(model, data);
   }
