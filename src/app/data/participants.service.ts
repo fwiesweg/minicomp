@@ -21,6 +21,7 @@ export class ParticipantsService {
     return p1.id.localeCompare(p2.id);
   }
 
+  public readonly balance: Observable<number>;
   public readonly locked: Observable<boolean>;
   public readonly participants: Observable<Participant[]>;
   public readonly unlocked: Observable<boolean>;
@@ -31,6 +32,12 @@ export class ParticipantsService {
     this.unlocked = this.locked.pipe(map(x => !x));
     this.participants = this.storageService.read('Participant').pipe(
       map(x => x.sort(ParticipantsService.sort)),
+      shareReplay(1)
+    );
+    this.balance = this.participants.pipe(
+      map(x => (
+        x.filter(x => x.role === 'LEAD').length - x.filter(x => x.role === 'FOLLOW').length
+      )),
       shareReplay(1)
     );
   }

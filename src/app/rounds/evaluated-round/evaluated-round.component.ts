@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { Id, Participant, Round, trackById } from 'src/app/data/model.base';
+import { Id, Round, trackById } from 'src/app/data/model.base';
 import { FormControl, Validators } from '@angular/forms';
+import { RoundsService } from 'src/app/data/rounds.service';
 
 @Component({
   selector: 'app-evaluated-round',
@@ -8,6 +9,9 @@ import { FormControl, Validators } from '@angular/forms';
   styleUrls: [ './evaluated-round.component.scss' ]
 })
 export class EvaluatedRoundComponent {
+
+  constructor(public roundsService: RoundsService) {
+  }
 
   private _round: null | Round = null;
 

@@ -2,7 +2,7 @@
   <table mat-table [dataSource]="heat.couples" [trackBy]="id">
 
     <ng-container matColumnDef="lead">
-      <th mat-header-cell *matHeaderCellDef>Heat #{{ heatIdx + 1}}, Lead</th>
+      <th mat-header-cell *matHeaderCellDef>{{ heat.dance }}, heat #{{ heat.id }}, Lead</th>
       <td mat-cell *matCellDef="let element">{{element.lead}}</td>
     </ng-container>
 

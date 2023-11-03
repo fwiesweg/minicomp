@@ -23,45 +23,36 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
     )
   }
 
-  participantFormGroup = new FormGroup({
+  public participantFormGroup = new FormGroup({
     id: new FormControl<null>(null),
     type: new FormControl<null>(null),
     firstName: new FormControl<null | string>(null, [ Validators.required ]),
     lastName: new FormControl<null | string>(null, [ Validators.required ]),
     role: new FormControl<null | Role>(null, [ Validators.required ])
   });
-  subscription: Subscription = new Subscription();
+  private subscription: Subscription = new Subscription();
 
   @ViewChild(MatTable)
   public table!: MatTable<Participant>;
 
   public readonly id = trackById;
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.subscription.add(this.participantsService.participants.pipe(
       tap(() => this.table && this.table.renderRows())
     ).subscribe());
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  addParticipant() {
+  public addParticipant() {
     this.participantsService.addParticipant(this.participantFormGroup.value).subscribe();
 
     this.participantFormGroup.reset();
     this.participantFormGroup.markAsUntouched();
     this.participantFormGroup.markAsPristine();
     this.participantFormGroup.updateValueAndValidity()
-  }
-
-  lock() {
-    this.participantsService.lock().pipe(
-      catchError((error) => {
-        alert(error);
-        return of(null);
-      })
-    ).subscribe()
   }
 }

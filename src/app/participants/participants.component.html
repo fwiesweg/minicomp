@@ -72,9 +72,11 @@
   </mat-card-header>
   <mat-card-content>
     <p>In order to start the first round, you have to lock the participants. Once started, the participants can only be edited by resetting the competion.</p>
+    <p *ngIf="((participantsService.balance | async) ?? 0) > 0">Unbalanced participants: There are {{ participantsService.balance | async}} more leads than follows.</p>
+    <p *ngIf="((participantsService.balance | async) ?? 0) < 0">Unbalanced participants: There are {{ -((participantsService.balance | async) ?? 0) }} more follows than leads.</p>
   </mat-card-content>
   <mat-card-actions align="end">
-    <button mat-raised-button color="primary" class="flex-auto" type="button" (click)="lock()">
+    <button mat-raised-button color="primary" class="flex-auto" type="button" (click)="participantsService.lock().subscribe()" [disabled]="(participantsService.balance | async) !== 0">
       Lock participants
     </button>
   </mat-card-actions>

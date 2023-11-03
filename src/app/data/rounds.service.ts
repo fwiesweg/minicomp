@@ -45,8 +45,8 @@ const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] =>
 };
 
 const generateRound = (previous: Round | null, starters: { leads: Id[], follows: Id[] }): Round => {
-  if (starters.leads.length !== starters.follows.length) throw new Error();
-  if(previous?.state !== 'EVALUATED') throw new Error();
+  if (starters.leads.length !== starters.follows.length) throw new Error('Unbalanced starters');
+  if(previous != null && previous?.state !== 'EVALUATED') throw new Error('Bad previous round state');
 
   return {
     id: generateId(),
