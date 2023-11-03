@@ -1,7 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BASE_TYPES, BaseType, BaseTypeMap, Participant, Round } from 'src/app/data/model.base';
-import { BehaviorSubject, EMPTY, first, fromEvent, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, first, forkJoin, fromEvent, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { SINGLETON_TYPES, SingletonType, SingletonTypeMap, State } from 'src/app/data/model.singleton';
+
+interface DataExport {
+  type: 'base' | 'singleton';
+  model: string;
+  data: object;
+}
 
 
 export abstract class StorageService {
@@ -11,8 +17,8 @@ export abstract class StorageService {
   public abstract store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null>;
 
   public edit<T extends BaseType>(model: T,
-      filter: (data: BaseTypeMap[T]) => boolean,
-      edit: (data: BaseTypeMap[T]) => BaseTypeMap[T]) {
+                                  filter: (data: BaseTypeMap[T]) => boolean,
+                                  edit: (data: BaseTypeMap[T]) => BaseTypeMap[T]) {
     return this.read(model).pipe(
       first(),
       map(x => x.map(y => {
@@ -34,7 +40,49 @@ export abstract class StorageService {
 
   public abstract storeSingleton<T extends SingletonType>(model: T, data: SingletonTypeMap[T]): Observable<null>;
 
+  public export(): Observable<string> {
+    const obsBase: Observable<DataExport>[] = BASE_TYPES.map(model => this.read(model).pipe(
+      map(data => ({
+        type: 'base' as const,
+        model: model,
+        data: data
+      }))
+    ));
+
+    const obsSingleton: Observable<DataExport>[] = SINGLETON_TYPES.map(model => this.readSingleton(model).pipe(
+      map(data => ({
+        type: 'singleton' as const,
+        model: model,
+        data: data
+      }))
+    ));
+
+    return forkJoin(obsBase.concat(obsSingleton)).pipe(
+      map(x => JSON.stringify(x))
+    );
+  }
+
+  public import(data: string): Observable<null> {
+    const input = JSON.parse(data);
+    if (!Array.isArray(input)) {
+      throw new Error('No array');
+    }
+
+    const obs: Observable<unknown>[] = [];
+
+    for (const elementAny of input) {
+      const element = elementAny as DataExport;
+      if (element.type === 'base') {
+        obs.push(this.store(element.model as BaseType, element.data as any));
+      } else if (element.type === 'singleton') {
+        obs.push(this.storeSingleton(element.model as SingletonType, element.data as any));
+      }
+    }
+
+    return forkJoin(obs).pipe(map(() => null));
+  }
 }
+
 
 type BaseSubjects = { [key in BaseType]: BehaviorSubject<BaseTypeMap[key][]> };
 type SingletonSubjects = { [key in SingletonType]: BehaviorSubject<SingletonTypeMap[key]> };
