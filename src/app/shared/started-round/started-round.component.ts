@@ -73,6 +73,7 @@ export class StartedRoundComponent implements OnDestroy {
     if (round == null) throw Error();
 
     let obs: Observable<null> = of(null);
+    let totalPoints = 0;
     for (let i = 0; i < this.formArray.length; i++) {
       const result: Couple[] = [];
       const innerFormArray = this.formArray.at(i);
@@ -86,13 +87,17 @@ export class StartedRoundComponent implements OnDestroy {
           ...couple,
           points: 1
         });
+        totalPoints += 1;
       }
 
       if (result.every(c => c.points === 0)) {
         continue;
       }
 
-      obs = obs.pipe(switchMap(() => this.roundsService.addPoints(round, round.heats[i], result)));
+      obs = obs.pipe(switchMap(() => {
+        result.forEach(x => x.points /= totalPoints);
+        return this.roundsService.addPoints(round, round.heats[i], result)
+      }));
     }
 
     return obs.pipe(map(() => null));
