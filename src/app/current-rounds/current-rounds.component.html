@@ -21,14 +21,10 @@
 
 
 <ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id;">
-  <mat-card class="main-card" *ngIf="round.state === 'EVALUATED'">
-    <mat-card-header>
-      <mat-card-title>Evaluated round: #{{round.number}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
-    </mat-card-content>
-    <mat-card-actions>
+  <h1>Round #{{round.number}}</h1>
+  <ng-container *ngIf="round.state === 'EVALUATED'">
+    <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
+    <div class="flex-row">
       <button type="button" class="flex-auto" mat-button
               (click)="roundsService.finishRound(evaluatedRounds.forStorage(), false).subscribe()"
               [disabled]="evaluatedRounds.invalid">End competition</button>
@@ -36,32 +32,25 @@
       <button type="button" class="flex-auto" mat-raised-button color="primary"
               (click)="roundsService.finishRound(evaluatedRounds.forStorage(), true).subscribe()"
               [disabled]="evaluatedRounds.invalid">Prepare next round</button>
-    </mat-card-actions>
-  </mat-card>
+    </div>
+  </ng-container>
 
-  <mat-card class="main-card" *ngIf="round.state === 'STARTED'">
-    <mat-card-header>
-      <mat-card-title>Current round: #{{round.number}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <app-started-round-component #startedRounds [round]="round"></app-started-round-component>
-    </mat-card-content>
-    <mat-card-actions align="end">
+  <ng-container *ngIf="round.state === 'STARTED'">
+    <app-started-round-component #startedRounds [round]="round"></app-started-round-component>
+
+    <div class="flex-row">
+      <div class="flex-fill"></div>
       <button type="button" class="flex-auto" mat-raised-button color="primary"
               (click)="roundsService.evaluateRound(round, startedRounds.forStorage()).subscribe()"
               [disabled]="startedRounds.invalid">Evaluate round
       </button>
-    </mat-card-actions>
-  </mat-card>
+    </div>
+  </ng-container>
 
-  <mat-card class="main-card" *ngIf="round.state === 'DRAFT'">
-    <mat-card-header>
-      <mat-card-title>Next round: #{{round.number}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <app-draft-round-component #draftRounds [round]="round"></app-draft-round-component>
-    </mat-card-content>
-    <mat-card-actions align="end">
+  <ng-container *ngIf="round.state === 'DRAFT'">
+    <app-draft-round-component #draftRounds [round]="round"></app-draft-round-component>
+    <div class="flex-row">
+      <div class="flex-fill"></div>
       <button type="button" class="flex-auto" mat-raised-button color="primary"
               (click)="roundsService.suggestDraw(draftRounds.heatSizes).subscribe()"
               [disabled]="draftRounds.invalid">Suggest new draw
@@ -70,6 +59,6 @@
               (click)="roundsService.startRound(round).subscribe()"
               [disabled]="round.heats.length === 0">Start round
       </button>
-    </mat-card-actions>
-  </mat-card>
+    </div>
+  </ng-container>
 </ng-container>

@@ -1,8 +1,9 @@
 <ng-container *ngFor="let heat of heats; index as heatIdx; trackBy: idx">
+  <h2>{{ heat.dance }}, heat #{{ heat.id }}</h2>
   <table mat-table [dataSource]="heat.couples" [trackBy]="id">
 
     <ng-container matColumnDef="lead">
-      <th mat-header-cell *matHeaderCellDef>{{ heat.dance }}, heat #{{ heat.id }}, Lead</th>
+      <th mat-header-cell *matHeaderCellDef>Lead</th>
       <td mat-cell *matCellDef="let element">{{element.lead}}</td>
     </ng-container>
 
