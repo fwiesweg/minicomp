@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { BaseInput, generateId, Participant } from 'src/app/data/model.base';
+import { BaseInput, generateId, generateRound, Participant } from 'src/app/data/model.base';
 import { combineLatest, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
 import { StorageService } from 'src/app/data/storage.service';
 import { State } from 'src/app/data/model.singleton';
@@ -85,13 +85,23 @@ export class ParticipantsService {
         ...state,
         locked: true
       });
-    });
+    }).pipe(
+      switchMap(() => this.participants),
+      first(),
+      map(p => generateRound(1, {
+        leads: p.filter(x => x.role === 'LEAD').map(x => x.id),
+        follows: p.filter(x => x.role === 'FOLLOW').map(x => x.id)
+      })),
+      switchMap(round => this.storageService.store('Round', [ round ]))
+    );
   }
 
   public unlock(): Observable<null> {
     return this.edit((state, participants) => this.storageService.storeSingleton('State', {
       ...state,
       locked: false
-    }), true);
+    }), true).pipe(
+      switchMap(() => this.storageService.store('Round', []))
+    );
   }
 }

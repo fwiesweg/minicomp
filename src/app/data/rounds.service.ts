@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { combineLatest, EMPTY, filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
+import { filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, DANCE, generateId, Id, Result, Round } from 'src/app/data/model.base';
+import { Couple, DANCE, generateId, generateRound, Id, Result, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 
 const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] => {
@@ -44,30 +44,6 @@ const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] =>
   return returnValue;
 };
 
-const generateRound = (roundNumber: number, starters: { leads: Id[], follows: Id[] }): Round => {
-  if (starters.leads.length !== starters.follows.length) throw new Error('Unbalanced starters');
-
-  return {
-    id: generateId(),
-    type: 'Round',
-    number: roundNumber,
-    state: 'DRAFT',
-    heats: [],
-    results: {
-      leads: starters.leads.map(x => ({
-        id: x,
-        type: '' as const,
-        points: 0
-      })),
-      follows: starters.follows.map(x => ({
-        id: x,
-        type: '' as const,
-        points: 0
-      }))
-    },
-    couplesKept: null
-  };
-};
 
 @Injectable({
   providedIn: 'root'
@@ -89,24 +65,6 @@ export class RoundsService implements OnDestroy {
       map(x => x[x.length - 1]),
       shareReplay(1)
     );
-
-    this.subscription.add(combineLatest([ this.participantsService.locked, this.rounds ]).pipe(
-      switchMap(([ locked, rounds ]) => {
-        if (!locked && rounds.length > 0) {
-          return this.storageService.store('Round', []);
-        } else if (locked && rounds.length == 0) {
-          return this.participantsService.participants.pipe(
-            first(),
-            map(p => generateRound(1, {
-              leads: p.filter(x => x.role === 'LEAD').map(x => x.id),
-              follows: p.filter(x => x.role === 'FOLLOW').map(x => x.id)
-            })),
-            switchMap(round => this.storageService.store('Round', [round]))
-          );
-        } else {
-          return EMPTY;
-        }
-      })).subscribe());
   }
 
   private subscription = new Subscription();

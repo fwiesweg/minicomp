@@ -94,3 +94,29 @@ export interface ParticipantResult extends Base {
 
   points: number;
 }
+
+
+export const generateRound = (roundNumber: number, starters: { leads: Id[], follows: Id[] }): Round => {
+  if (starters.leads.length !== starters.follows.length) throw new Error('Unbalanced starters');
+
+  return {
+    id: generateId(),
+    type: 'Round',
+    number: roundNumber,
+    state: 'DRAFT',
+    heats: [],
+    results: {
+      leads: starters.leads.map(x => ({
+        id: x,
+        type: '' as const,
+        points: 0
+      })),
+      follows: starters.follows.map(x => ({
+        id: x,
+        type: '' as const,
+        points: 0
+      }))
+    },
+    couplesKept: null
+  };
+};
