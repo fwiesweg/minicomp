@@ -1,11 +1,15 @@
-<mat-toolbar color="primary">
-  <a mat-button routerLink="">{{ title | uppercase }}</a>
-  <ul class="nav-list">
+<mat-toolbar color="primary" class="flex-row">
+  <a mat-button routerLink="" class="flex-auto">{{ title | uppercase }}</a>
+  <ul class="nav-list flex-fill">
     <li><a mat-button routerLink="participants">Participants</a></li>
     <li><a mat-button routerLink="current-rounds">Current round</a></li>
     <li><a mat-button routerLink="previous-rounds">Previous rounds</a></li>
   </ul>
+  <button mat-mini-fab type="button" class="flex-auto" (click)="export()"><mat-icon>download</mat-icon></button>
+  <button mat-mini-fab type="button" class="flex-auto" (click)="import()"><mat-icon>upload</mat-icon></button>
 </mat-toolbar>
+
+<input #importInput style="display: none" type="file" accept="application/json" (change)="importInputChanged.next(null)"/>
 
 <div class="container">
 <router-outlet></router-outlet>

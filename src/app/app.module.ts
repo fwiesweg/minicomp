@@ -20,6 +20,7 @@ import { EvaluatedRoundComponent } from 'src/app/shared/evaluated-round/evaluate
 import { StartedRoundComponent } from 'src/app/shared/started-round/started-round.component';
 import { PreviousRoundsComponent } from 'src/app/previous-rounds/previous-rounds.component';
 import { CurrentRoundsComponent } from 'src/app/current-rounds/current-rounds.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { CurrentRoundsComponent } from 'src/app/current-rounds/current-rounds.co
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    MatSnackBarModule,
     MatTableModule,
     MatToolbarModule,
 

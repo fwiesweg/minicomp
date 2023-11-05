@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BASE_TYPES, BaseType, BaseTypeMap, Participant, Round } from 'src/app/data/model.base';
-import { BehaviorSubject, EMPTY, first, forkJoin, fromEvent, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, first, forkJoin, fromEvent, map, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { SINGLETON_TYPES, SingletonType, SingletonTypeMap, State } from 'src/app/data/model.singleton';
 
 interface DataExport {
@@ -57,7 +57,7 @@ export abstract class StorageService {
       }))
     ));
 
-    return forkJoin(obsBase.concat(obsSingleton)).pipe(
+    return combineLatest([ ...obsBase, ...obsSingleton ]).pipe(
       map(x => JSON.stringify(x))
     );
   }
@@ -78,6 +78,7 @@ export abstract class StorageService {
         obs.push(this.storeSingleton(element.model as SingletonType, element.data as any));
       }
     }
+
 
     return forkJoin(obs).pipe(map(() => null));
   }
@@ -202,13 +203,17 @@ export class LocalStorageService extends BehaviorSubjectStorageService implement
   }
 
   public override store<T extends BaseType>(model: T, data: BaseTypeMap[T][]): Observable<null> {
-    localStorage.setItem(BASE_PREFIX + model, JSON.stringify(data));
-    return super.store(model, data);
+    return of(null).pipe(
+      tap(() => localStorage.setItem(BASE_PREFIX + model, JSON.stringify(data))),
+      switchMap(() => super.store(model, data))
+    );
   }
 
   public override storeSingleton<T extends SingletonType>(model: T, data: SingletonTypeMap[T]): Observable<null> {
-    localStorage.setItem(SINGLETON_PREFIX + model, JSON.stringify(data));
-    return super.storeSingleton(model, data);
+    return of(null).pipe(
+      tap(() => localStorage.setItem(SINGLETON_PREFIX + model, JSON.stringify(data))),
+      switchMap(() => super.storeSingleton(model, data))
+    );
   }
 }
 
