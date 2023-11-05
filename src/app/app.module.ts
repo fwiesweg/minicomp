@@ -22,6 +22,7 @@ import { PreviousRoundsComponent } from 'src/app/previous-rounds/previous-rounds
 import { CurrentRoundsComponent } from 'src/app/current-rounds/current-rounds.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ParticipantPipe } from './data/participant.pipe';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
     DraftRoundComponent,
     EvaluatedRoundComponent,
-    StartedRoundComponent
+    StartedRoundComponent,
+
+    ParticipantPipe
   ],
   imports: [
     BrowserModule,

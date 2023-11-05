@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 
-import { BaseInput, generateId, generateRound, Participant } from 'src/app/data/model.base';
-import { combineLatest, first, map, Observable, shareReplay, switchMap, throwError } from 'rxjs';
+import { BaseInput, generateId, generateRound, Id, Participant } from 'src/app/data/model.base';
+import { combineLatest, first, map, Observable, shareReplay, Subscription, switchMap, tap, throwError } from 'rxjs';
 import { StorageService } from 'src/app/data/storage.service';
 import { State } from 'src/app/data/model.singleton';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ParticipantsService {
+export class ParticipantsService implements OnDestroy {
   private static sort(p1: Participant, p2: Participant) {
     let result: number;
 
@@ -20,6 +20,10 @@ export class ParticipantsService {
 
     return p1.id.localeCompare(p2.id);
   }
+
+  private participantCache: Map<Id, Participant> = new Map();
+
+  private subscription = new Subscription();
 
   public readonly balance: Observable<number>;
   public readonly locked: Observable<boolean>;
@@ -40,7 +44,27 @@ export class ParticipantsService {
       )),
       shareReplay(1)
     );
+
+    this.subscription.add(combineLatest([ this.locked, this.participants ]).pipe(
+      map(([ locked, participants ]) => {
+        if (!locked) return new Map();
+
+        const map = new Map();
+        for (const p of participants) {
+          map.set(p.id, p);
+        }
+
+        return map;
+      }),
+      tap(x => this.participantCache = x)
+    ).subscribe());
   }
+
+  public ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+
 
   private edit<T>(editFunction: ((state: State, participants: Participant[]) => Observable<T>), allowLocked: boolean = false): Observable<T> {
     return combineLatest([
@@ -103,5 +127,9 @@ export class ParticipantsService {
     }), true).pipe(
       switchMap(() => this.storageService.store('Round', []))
     );
+  }
+
+  public forPipe(participantId: Id) {
+    return this.participantCache.get(participantId);
   }
 }
