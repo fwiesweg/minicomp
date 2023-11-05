@@ -20,4 +20,5 @@ export class CurrentRoundsComponent {
   }
 
   public readonly id = trackById;
+
 }

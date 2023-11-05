@@ -23,7 +23,7 @@
 </p>
 
 <ng-container *ngFor="let heat of heats; index as heatIdx; trackBy: idx">
-  <h2>{{ heat.dance }}, heat #{{ heat.id }}</h2>
+  <h2>{{ heat.dance }}, heat #{{ heat.number }}</h2>
   <table mat-table [dataSource]="heat.couples" [trackBy]="id">
 
     <ng-container matColumnDef="lead">

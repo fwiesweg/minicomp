@@ -21,6 +21,7 @@ import { StartedRoundComponent } from 'src/app/shared/started-round/started-roun
 import { PreviousRoundsComponent } from 'src/app/previous-rounds/previous-rounds.component';
 import { CurrentRoundsComponent } from 'src/app/current-rounds/current-rounds.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
   declarations: [
@@ -45,11 +46,12 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatSnackBarModule,
     MatTableModule,
-    MatToolbarModule,
 
-    AppRoutingModule,
+    MatToolbarModule,
+    AppRoutingModule
   ],
   providers: [ {
     provide: StorageService,

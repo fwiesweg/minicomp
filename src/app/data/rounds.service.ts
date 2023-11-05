@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, DANCE, generateId, generateRound, Id, Result, Round } from 'src/app/data/model.base';
+import { Couple, DANCE, generateId, generateRound, Heat, Id, ParticipantResult, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 
 const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] => {
@@ -34,7 +34,8 @@ const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] =>
         id: generateId(),
         type: '',
         lead: leads[couple],
-        follow: follows[couple]
+        follow: follows[couple],
+        points: 0
       });
 
       couple++;
@@ -117,10 +118,11 @@ export class RoundsService implements OnDestroy {
               );
 
               return couples.map((cpls, idx) => ({
-                id: `${idx + 1}`,
+                id: generateId(),
                 type: '',
                 couples: cpls,
-                dance: dance
+                dance: dance,
+                number: idx + 1
               }));
             })
           })
@@ -139,14 +141,50 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public evaluateRound(round: Round, results: Result) {
+  public evaluateRound(round: Round) {
     return this.storageService.edit('Round',
       x => x.id === round.id,
-      x => ({
-        ...x,
-        results: results,
-        state: 'EVALUATED'
-      })
+      x => {
+        const leads = new Map<Id, ParticipantResult>();
+        const follows = new Map<Id, ParticipantResult>();
+        for (let i = 0; i < x.heats.length; i++) {
+          const couples = x.heats[i].couples;
+          for (let j = 0; j < couples.length; j++) {
+            const couple = couples[j];
+
+            let lead = leads.get(couple.lead);
+            if (lead == null) {
+              lead = {
+                id: couple.lead,
+                type: '',
+                points: 0
+              };
+              leads.set(couple.lead, lead);
+            }
+            lead.points += couple.points;
+
+            let follow = follows.get(couple.follow);
+            if (follow == null) {
+              follow = {
+                id: couple.follow,
+                type: '',
+                points: 0
+              };
+              follows.set(couple.follow, follow);
+            }
+            follow.points += couple.points;
+          }
+        }
+
+        return ({
+          ...x,
+          results: {
+            leads: Array(...leads.values()).sort((r1, r2) => r2.points - r1.points),
+            follows: Array(...follows.values()).sort((r1, r2) => r2.points - r1.points)
+          },
+          state: 'EVALUATED'
+        });
+      }
     );
   }
 
@@ -162,5 +200,31 @@ export class RoundsService implements OnDestroy {
       map(round => generateRound(round + 1, starters)),
       switchMap(x => this.storageService.add('Round', x))
     );
+  }
+
+  public addPoints(round: Round, heat: Heat, result: Couple[]) {
+    return this.storageService.edit('Round', x => x.id === round.id,
+      r => ({
+        ...r,
+        heats: round.heats.map(ih => {
+          if (ih.id !== heat.id) return ih;
+
+          if (!result.reduce((prev, couple) => {
+            for (const ic of ih.couples) {
+              if (ic.id === couple.id) {
+                ic.points += couple.points;
+                return true;
+              }
+            }
+
+            return false;
+          }, false)) {
+            console.error('Inconsistent result');
+            throw new Error('Inconsistent result');
+          }
+
+          return ih;
+        })
+      }));
   }
 }

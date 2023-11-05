@@ -73,15 +73,17 @@ export interface Round extends Base {
 export interface Heat extends Base {
   type: '';
 
-  dance: Dance,
-  couples: Couple[]
+  dance: Dance;
+  couples: Couple[];
+  number: number;
 }
 
 export interface Couple extends Base {
   type: '';
 
-  lead: Id
-  follow: Id
+  lead: Id;
+  follow: Id;
+  points: number;
 }
 
 export interface Result {
@@ -90,7 +92,7 @@ export interface Result {
 }
 
 export interface ParticipantResult extends Base {
-  type: '',
+  type: '';
 
   points: number;
 }
