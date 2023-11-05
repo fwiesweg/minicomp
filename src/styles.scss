@@ -36,7 +36,19 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   flex: 0 0 auto;
 }
 
+.no-print {
+  @media print {
+    display: none !important;
+  }
+}
+
 .main-card {
   width: 100%;
   margin-top: 25px;
+}
+
+@media print {
+  table {
+    page-break-inside: avoid;
+  }
 }

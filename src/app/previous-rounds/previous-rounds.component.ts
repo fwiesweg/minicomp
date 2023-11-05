@@ -13,7 +13,7 @@ export class PreviousRoundsComponent {
 
   constructor(public roundsService: RoundsService) {
     this.noPreviousRounds = this.roundsService.rounds.pipe(
-      map(x => x.filter(x => x.state === 'SUPERSEEDED').length === 0),
+      map(x => x.filter(x => x.state === 'SUPERSEDED').length === 0),
       shareReplay(1),
     );
   }

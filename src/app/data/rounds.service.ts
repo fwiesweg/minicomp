@@ -155,7 +155,7 @@ export class RoundsService implements OnDestroy {
       first(),
       switchMap(x => this.storageService.edit('Round', r => r.id === x.id, r => ({
         ...r,
-        state: 'SUPERSEEDED',
+        state: 'SUPERSEDED',
         couplesKept: starters.leads.length
       })).pipe(map(() => x.number))),
       filter(() => startNext),

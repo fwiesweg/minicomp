@@ -14,7 +14,7 @@ export class CurrentRoundsComponent {
 
   constructor(public participantsService: ParticipantsService, public roundsService: RoundsService) {
     this.noCurrentRounds = roundsService.rounds.pipe(
-      map(x => x.filter(y => y.state !== 'SUPERSEEDED').length === 0),
+      map(x => x.filter(y => y.state !== 'SUPERSEDED').length === 0),
       shareReplay(1)
     )
   }

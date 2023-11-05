@@ -21,10 +21,10 @@
 
 
 <ng-container *ngFor="let round of (roundsService.rounds | async); trackBy: id;">
-  <h1>Round #{{round.number}}</h1>
+  <h1 *ngIf="round.state !== 'SUPERSEDED'">Round #{{round.number}}</h1>
   <ng-container *ngIf="round.state === 'EVALUATED'">
     <app-evaluated-round #evaluatedRounds [round]="round"></app-evaluated-round>
-    <div class="flex-row">
+    <div class="flex-row no-print">
       <button type="button" class="flex-auto" mat-button
               (click)="roundsService.finishRound(evaluatedRounds.forStorage(), false).subscribe()"
               [disabled]="evaluatedRounds.invalid">End competition</button>
@@ -38,7 +38,7 @@
   <ng-container *ngIf="round.state === 'STARTED'">
     <app-started-round-component #startedRounds [round]="round"></app-started-round-component>
 
-    <div class="flex-row">
+    <div class="flex-row no-print">
       <div class="flex-fill"></div>
       <button type="button" class="flex-auto" mat-raised-button color="primary"
               (click)="roundsService.evaluateRound(round, startedRounds.forStorage()).subscribe()"
@@ -49,7 +49,7 @@
 
   <ng-container *ngIf="round.state === 'DRAFT'">
     <app-draft-round-component #draftRounds [round]="round"></app-draft-round-component>
-    <div class="flex-row">
+    <div class="flex-row no-print">
       <div class="flex-fill"></div>
       <button type="button" class="flex-auto" mat-raised-button color="primary"
               (click)="roundsService.suggestDraw(draftRounds.heatSizes).subscribe()"

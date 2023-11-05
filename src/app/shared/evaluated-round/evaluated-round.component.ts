@@ -60,7 +60,7 @@ export class EvaluatedRoundComponent {
   public qualified(idx: number) {
     if (this._round?.state === 'EVALUATED')
       return idx < (this.couplesKeptFormControl.value ?? 0);
-    else if (this._round?.state === 'SUPERSEEDED')
+    else if (this._round?.state === 'SUPERSEDED')
       return idx < (this._round.couplesKept ?? 0);
     return false;
   }
