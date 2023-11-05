@@ -1,0 +1,15 @@
+tr:nth-child(4n+1) {
+  color: green;
+}
+
+tr:nth-child(4n+2) {
+  color: purple;
+}
+
+tr:nth-child(4n+3) {
+  color: darkred;
+}
+
+tr:nth-child(4n+4) {
+  color: steelblue;
+}
