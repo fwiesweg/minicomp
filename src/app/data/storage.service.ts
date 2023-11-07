@@ -79,7 +79,7 @@ export abstract class StorageService {
       }
     }
 
-
+    localStorage.clear();
     return forkJoin(obs).pipe(map(() => null));
   }
 }
