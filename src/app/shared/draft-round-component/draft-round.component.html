@@ -1,26 +1,56 @@
-<p>Please enter your desired heat configuration.</p>
 <form [formGroup]="formGroup">
-  <div class="flex-row-wrap">
-    <mat-form-field appearance="fill" class="flex-auto">
+  <div class="flex-row-wrap" style="margin-bottom: 10px; justify-content: space-around">
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Slow Waltz', 'ChaChaCha', 'Tango', 'Rumba', 'Quick Step', 'Jive' ])">Six dances (mixed)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'ChaChaCha', 'Rumba', 'Jive' ])">Three dances (Latin)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Samba', 'ChaChaCha', 'Rumba', 'Jive' ])">Four dances (Latin)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Samba', 'ChaChaCha', 'Rumba', 'Paso Doble', 'Jive' ])">Five dances (Latin)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Slow Waltz', 'Tango', 'Quick Step' ])">Three dances (Standard)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Waltz', 'Tango', 'Slow Fox', 'Quick Step' ])">Four dances (Standard)</button>
+    <button mat-button type="button" class="flex-auto" (click)="defaultDances([ 'Slow Waltz', 'Tango', 'Viennese Waltz', 'Slow Fox', 'Quick Step' ])">Five dances (Standard)</button>
+  </div>
+
+  <div class="flex-row">
+    <mat-form-field class="flex-fill">
+      <mat-label>Dance selection</mat-label>
+      <mat-chip-grid #chipGrid [formControl]="formGroup.controls.dances">
+        <mat-chip-row *ngFor="let dance of formGroup.controls.dances.value" (removed)="removeDance(dance)"
+                      color="primary" highlighted>
+          {{dance}}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+      </mat-chip-grid>
+      <input placeholder="New dance..."
+             [matChipInputFor]="chipGrid"
+             (matChipInputTokenEnd)="addDance($event)"/>
+    </mat-form-field>
+  </div>
+
+  <div class="flex-row">
+    <mat-form-field appearance="fill" class="flex-fill">
       <mat-label>Number of heats</mat-label>
       <input matInput type="number" min="1" formControlName="heats">
     </mat-form-field>
+  </div>
 
+  <div class="flex-row-wrap">
     <mat-form-field appearance="fill" class="flex-auto"
                     *ngFor="let formControl of formGroup.controls.heatSizes.controls; index as heatIdx">
       <mat-label>Couples in heat #{{ heatIdx + 1 }}</mat-label>
       <input matInput type="number" min="1" [formControl]="formControl">
     </mat-form-field>
   </div>
+
+  <p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') > 0">
+    Heatsize mismatch: You require {{ formGroup.getError('heatsize-mismatch') }} couple(s) too many for
+    this round.
+  </p>
+  <p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') < 0">
+    Heatsize mismatch: You require {{ -1 * formGroup.getError('heatsize-mismatch') }} couple(s) too little
+    for this round.
+  </p>
 </form>
-<p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') > 0">
-  Heatsize mismatch: You require {{ formGroup.getError('heatsize-mismatch') }} couple(s) too many for
-  this round.
-</p>
-<p class="mat-small" *ngIf="formGroup.getError('heatsize-mismatch') < 0">
-  Heatsize mismatch: You require {{ -1 * formGroup.getError('heatsize-mismatch') }} couple(s) too little
-  for this round.
-</p>
 
 <ng-container *ngFor="let heat of heats; index as heatIdx; trackBy: idx">
   <h2>{{ heat.dance }}, heat #{{ heat.number }}</h2>

@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { filter, first, map, Observable, shareReplay, Subscription, switchMap, throwError } from 'rxjs';
 import { ParticipantsService } from 'src/app/data/participants.service';
-import { Couple, DANCE, generateId, generateRound, Heat, Id, ParticipantResult, Round } from 'src/app/data/model.base';
+import { Couple, Dance, generateId, generateRound, Heat, Id, ParticipantResult, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
 import { shuffle } from 'src/app/shared/util';
 
@@ -62,7 +62,7 @@ export class RoundsService implements OnDestroy {
     return round1.number - round2.number;
   }
 
-  public canDraw(value: (null | number)[]): Observable<number> {
+  public canDraw(value: ReadonlyArray<number>): Observable<number> {
     return this.participantsService.locked.pipe(
       filter(x => x),
       switchMap(() => this.currentRound),
@@ -80,7 +80,7 @@ export class RoundsService implements OnDestroy {
     );
   }
 
-  public suggestDraw(value: (null | number)[]): Observable<null> {
+  public suggestDraw(dances: ReadonlyArray<Dance>, value: ReadonlyArray<number>): Observable<null> {
     return this.canDraw(value).pipe(
       switchMap(mismatch => {
         if (mismatch !== 0) {
@@ -95,7 +95,7 @@ export class RoundsService implements OnDestroy {
           x => x.id === round.id,
           x => ({
             ...x,
-            heats: DANCE.flatMap(dance => {
+            heats: dances.flatMap(dance => {
               const couples = drawCouples(value.map(x => x ?? 0),
                 round.results.leads.map(x => x.id),
                 round.results.follows.map(x => x.id)

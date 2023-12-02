@@ -54,9 +54,7 @@ export interface Participant extends Base {
   role: Role
 }
 
-export type ArrayElement<A> = A extends readonly (infer T)[] ? T : never;
-export const DANCE = [ 'Slow Waltz', 'ChaChaCha', 'Tango', 'Rumba', 'Quick Step', 'Jive' ] as const;
-export type Dance = ArrayElement<typeof DANCE>;
+export type Dance = string;
 export type RoundType = 'Round';
 export type RoundState = 'DRAFT' | 'STARTED' | 'EVALUATED' | 'SUPERSEDED';
 

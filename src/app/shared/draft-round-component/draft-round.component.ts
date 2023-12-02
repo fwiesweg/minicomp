@@ -1,8 +1,12 @@
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RoundsService } from 'src/app/data/rounds.service';
 import { delay, filter, map, of, Subscription, tap } from 'rxjs';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Heat, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Dance, Heat, Round, trackById, trackByIdx } from 'src/app/data/model.base';
+import { MatChipInputEvent } from '@angular/material/chips';
+
+
+const listNotEmpty: ValidatorFn = x => x.value.length == 0 ? {'missing dance': true} : null;
 
 @Component({
   selector: 'app-draft-round-component',
@@ -28,13 +32,14 @@ export class DraftRoundComponent implements OnDestroy {
     ).subscribe());
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
   private readonly subscription = new Subscription();
 
   public readonly formGroup = new FormGroup({
+    dances: new FormControl<string[]>([], [ listNotEmpty, Validators.required ]),
     heats: new FormControl<null | number>(null, [ Validators.required ]),
     heatSizes: new FormArray<FormControl<null | number>>([])
   }, null, [ fg => {
@@ -68,7 +73,41 @@ export class DraftRoundComponent implements OnDestroy {
     return this.formGroup.invalid;
   }
 
-  public get heatSizes() {
-    return this.formGroup.controls.heatSizes.value;
+  public get heatSizes(): ReadonlyArray<number> {
+    return (this.formGroup.controls.heatSizes.value ?? []) as ReadonlyArray<number>;
+  }
+
+  public get dances(): ReadonlyArray<Dance> {
+    return this.formGroup.controls.dances.value ?? [];
+  }
+
+  public addDance(event: MatChipInputEvent) {
+    const dances = this.formGroup.controls.dances.value ?? [];
+    const dance = (event.value ?? '').trim();
+    if (!dance) {
+      return;
+    } else if (dances.includes(dance)) {
+      return;
+    }
+
+    this.formGroup.controls.dances.setValue([ ...dances, dance ]);
+    event.chipInput.clear();
+  }
+
+  public removeDance(dance: Dance) {
+    const dances = this.formGroup.controls.dances.value ?? [];
+
+    dance = (dance || '').trim();
+    if (!dance) {
+      return;
+    } else if (!dances.includes(dance)) {
+      return;
+    }
+
+    this.formGroup.controls.dances.setValue(dances.filter(x => x != dance));
+  }
+
+  public defaultDances(dances: Dance[]) {
+    this.formGroup.controls.dances.setValue(dances);
   }
 }

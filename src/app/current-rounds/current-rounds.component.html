@@ -55,7 +55,7 @@
     <app-draft-round-component #draftRounds [round]="round"></app-draft-round-component>
     <div class="flex-row no-print actions">
       <button type="button" class="flex-auto" mat-button
-              (click)="roundsService.suggestDraw(draftRounds.heatSizes).subscribe()"
+              (click)="roundsService.suggestDraw(draftRounds.dances, draftRounds.heatSizes).subscribe()"
               [disabled]="draftRounds.invalid">Suggest new draw
       </button>
       <div class="flex-fill"></div>
