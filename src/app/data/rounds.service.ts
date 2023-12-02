@@ -3,25 +3,9 @@ import { filter, first, map, Observable, shareReplay, Subscription, switchMap, t
 import { ParticipantsService } from 'src/app/data/participants.service';
 import { Couple, DANCE, generateId, generateRound, Heat, Id, ParticipantResult, Round } from 'src/app/data/model.base';
 import { StorageService } from 'src/app/data/storage.service';
+import { shuffle } from 'src/app/shared/util';
 
 const drawCouples = (value: number[], leads: Id[], follows: Id[]): Couple[][] => {
-
-  const randInt = (min: number, max: number) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  const shuffle = <T>(array: T[]) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = randInt(0, i);
-      const ip = array[i];
-      array[i] = array[j];
-      array[j] = ip;
-    }
-    return array;
-  };
-
   shuffle(leads);
   shuffle(follows);
 

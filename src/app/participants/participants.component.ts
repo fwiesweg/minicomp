@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ParticipantsService } from 'src/app/data/participants.service';
 import { MatTable } from '@angular/material/table';
-import { Participant, Role, trackById } from 'src/app/data/model.base';
-import { catchError, map, of, Subscription, tap } from 'rxjs';
+import { Id, Participant, Role, trackById } from 'src/app/data/model.base';
+import { map, Subscription, tap } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -23,6 +23,7 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
     )
   }
 
+  public drawnParticipants: Id[] = [];
   public participantFormGroup = new FormGroup({
     id: new FormControl<null>(null),
     type: new FormControl<null>(null),
@@ -54,5 +55,17 @@ export class ParticipantsComponent implements OnDestroy, OnInit {
     this.participantFormGroup.markAsUntouched();
     this.participantFormGroup.markAsPristine();
     this.participantFormGroup.updateValueAndValidity()
+
+    this.drawnParticipants = [];
+  }
+
+  public removeParticipant(participant: Participant) {
+    this.participantsService.removeParticipant(participant).subscribe();
+
+    this.drawnParticipants = [];
+  }
+
+  public drawParticipants() {
+    this.participantsService.drawParticipants().subscribe(x => this.drawnParticipants = [ x[0] ]);
   }
 }

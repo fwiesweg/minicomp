@@ -4,6 +4,7 @@ import { BaseInput, generateId, generateRound, Id, Participant } from 'src/app/d
 import { combineLatest, first, map, Observable, shareReplay, Subscription, switchMap, tap, throwError } from 'rxjs';
 import { StorageService } from 'src/app/data/storage.service';
 import { State } from 'src/app/data/model.singleton';
+import { shuffle } from 'src/app/shared/util';
 
 @Injectable({
   providedIn: 'root'
@@ -131,5 +132,23 @@ export class ParticipantsService implements OnDestroy {
 
   public forPipe(participantId: Id) {
     return this.participantCache.get(participantId);
+  }
+
+  public drawParticipants(): Observable<Id[]> {
+    return combineLatest([
+      this.balance, this.participants
+    ]).pipe(
+      first(),
+      map(([ balance, participants ]) => {
+        const candidates = balance > 0
+          ? participants.filter(x => x.role === 'LEAD')
+          : participants.filter(x => x.role === 'FOLLOW');
+        shuffle(candidates);
+
+        return candidates.filter(
+          (_, idx) => idx < Math.abs(balance)
+        ).map(x => x.id);
+      })
+    );
   }
 }
